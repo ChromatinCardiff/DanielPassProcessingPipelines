@@ -10,7 +10,7 @@ if (not defined $del){
 	$del = "\t";
 }
 if(not defined $file or $column or $ml or $value){
-	print "$usage## inputs are missing: file: $file, column: $column, operator: $ml, value: $value\n";
+	print "$usage## inputs are missing: file: $file, column: $column, operator: $ml, value: $value\n" and die;
 }
 
 open INFILE, $file or die "can't open input file\n";

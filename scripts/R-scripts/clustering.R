@@ -67,7 +67,7 @@ x.mds0 <- monoMDS(x.dis)
 stressplot(x.mds0, x.dis)
 plot(x.mds, type = "p", xlim=c(-0.2,0.25), ylim=c(-0.2,0.3))
 
-### kml
+### kml based clustering
 library("longitudinalData")
 install.packages("rgl")                           # sudo apt-get build-dep r-cran-rgl
 library(rgl)
