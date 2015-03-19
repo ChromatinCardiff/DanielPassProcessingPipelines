@@ -35,16 +35,17 @@ use Cwd;
 
 ##############################
 # Get options
-
+##############################
 use Getopt::Std;
 my %options=();
 getopts('i:o:p:w:f:E', \%options);
 
-my $usage = "## USAGE: SAMparser.pl [REQUIRED] -i infile.sam -o outdirectory -f {Flowcell ID} [OPTIONAL] -w {% window (default 0.2)} -p {particle sizes(comma separated, default 0,100,150,300,450)}";
+my $usage = "## USAGE: SAMparser.pl [REQUIRED] -i infile.sam -o outdirectory -f {Flowcell ID} [OPTIONAL] -w {% window (default 0.2)} -p {particle sizes(comma separated, default 0,100,150,300,450)} -E {will change from SAM quality (default) to ELAND}\n";
 
 if (!%options){
 	print "~~\n$usage\n~~\n" and die;
 }
+
 ################################################################################
 # SET THE VARIABLES BELOW AS REQUIRED
 ################################################################################
@@ -68,10 +69,14 @@ if(exists $options{p}){
 	@psizes = qw/0 100 150 300 450/;
 }
 
-# For SAM. Change to 142 & 284 respectively for ELAND
+# Default for for SAM. If using ELAND, pass the -E flag
 my $read_one_qual = 255;
 my $read_two_qual = 0;
 
+if(exists $options{E}){
+	$read_one_qual = 142;
+	$read_two_qual = 284;
+}
 
 print "Infile: $infile\nOutdirectory: $outdir\nParticle size window (+/-): $pwind\nFlowcell ID: $SAM_ID_flag\n";
 foreach (@psizes){
@@ -131,8 +136,6 @@ while(<IN>){
         }
     }    
 }
-#close(OUTPOS);
 close(IN);
-################################################################################
 
 
