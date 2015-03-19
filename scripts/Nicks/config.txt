@@ -1,0 +1,43 @@
+################################################################################
+# Configure Parameters: config.txt
+################################################################################
+#
+# This file is used to set the parameters for the script SAMparser.pl.
+# Lines beginning with a hash symbol are not processed
+#
+#################################################################################
+
+
+
+# input files (fully qualified) directory path. All files within this directory
+# will be processed. Do not need to leave a trailing /
+
+indir_path=/home/sbink/Nick_K/SAM_parser/parser1/in
+
+
+
+# output files (fully qualified) directory path. Do not need to leave a trailing /
+
+outdir_path=/home/sbink/Nick_K/SAM_parser/parser1/out
+
+
+
+# read_one_quality 
+# for ELAND set to 142 (Single-read align score);
+# for SAM set to 255;
+
+read_one_qual=255
+
+
+
+# read_two_quality 
+# for ELAND set to 284 (Paired-read align score);
+# for SAM set to 0;
+
+read_two_qual=0
+
+
+
+# partic_wind particle size (bp) window; usually 20%;
+
+pwind=0.2

@@ -1,0 +1,10 @@
+﻿################################################################################
+# Define Partical Size Range: partic_size_range.txt
+################################################################################
+#
+# This file contains a user-defined list of “particle size” classes for SAMparser.pl
+# Specified in a single line, each value is comma delimited
+#
+################################################################################
+
+50,100,150,300,450

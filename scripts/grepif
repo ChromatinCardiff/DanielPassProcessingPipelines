@@ -1,0 +1,29 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+my $usage = "~~~\n## USAGE: grepif [filename] [column to assess (base 0)] [gt or lt] [value] opt:[delimiter (default: tab)]\n~~~\n";
+
+my ($file, $column, $ml, $value, $del) = @ARGV;
+
+if (not defined $del){
+	$del = "\t";
+}
+if(not defined $file or $column or $ml or $value){
+	print "$usage## inputs are missing: file: $file, column: $column, operator: $ml, value: $value\n";
+}
+
+open INFILE, $file or die "can't open input file\n";
+while (my $line = <INFILE>){
+	chomp($line);
+	my @l = split($del, $line);
+	if ($ml == 'gt'){
+		if ($l[$column] > $value){
+			print "$line\n";
+		}
+	}elsif($ml == 'lt'){
+		if ($l[$column] < $value){
+			print "$line\n";
+		}
+	}
+}
