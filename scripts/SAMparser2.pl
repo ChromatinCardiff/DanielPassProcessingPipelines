@@ -4,6 +4,7 @@
 # Altered to read .sam files (change from original ELAND input) 8th June 2010: Nick Kent
 # Altered to output only the .txt file 13th Sept 2010: Nick Kent
 # Last fiddled with: Nick Kent, Aug 2011
+# Improved speed, added command flags, removed config file requirements, instructions on error, some defaults: Dan Pass, Mar 2015
 #
 # Usage: perl SAMparser.pl
 #
