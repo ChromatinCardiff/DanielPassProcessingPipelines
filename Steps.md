@@ -6,9 +6,7 @@
 bowtie -v 3 --trim3 14 --maxins 5000 --fr -k 1  -p 12 --sam indexes/TAIR10 -1 ES10_TCGGCA_L002_R1_001.fastq -2 ES10_TCGGCA_L002_R2_001.fastq bowtie1/ES10_50bp.sam -t
 
 <h3>To parse SAM file into particle sizes</h3>
-$ SAMparser2.pl
-	[REQUIRED] -i infile.sam -o outdirectory -f {Flowcell ID} 
-	[OPTIONAL] -w {% window (default 0.2)} -p {particle sizes (comma separated, default 0,100,150,300,450)}"
+$ SAMparser2.pl -i infile.sam -o outdirectory -f HISEQ -p 0,80,150,350,500, 680, 860)}"
 
 <h3>To extract Chromosomes from sam file (not cleverly)</h3>
 $ chr_split.sh
