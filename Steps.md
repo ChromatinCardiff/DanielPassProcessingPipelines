@@ -23,6 +23,7 @@ for i in *_grep.txt; do (cut -f9 $i | sed 's/-//' | sort -n | uniq -c > $i.hist 
 
 <h3>To merge chromosome files into one histogram (and addition of each chromosome values)</h3>
 $ cat *.hist > temp.txt
+
 $ awk '{arr[$2]+=$1} END {for (key in arr) printf("%s\t%s\n", key, arr[key])}' temp.txt   | sort +0n -1 >ES09_histogram.txt
 Use basic_smooth-norm.r to chart
 
