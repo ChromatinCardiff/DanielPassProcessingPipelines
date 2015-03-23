@@ -52,11 +52,32 @@ if (!%options){
 ################################################################################
 
 my $infile = $options{i}; 
-my $outdir = $options{o}; 
 my $SAM_ID_flag = $options{f};
-
+my $outdir; 
 my @psizes;
 my $pwind;
+
+# get the relevant info from the input file name
+(my $p1 = $infile) =~ s/^(.*\/)(\w+\.sam)$/$2/;
+my $def_outdir = $1;
+(my $prefix = $p1) =~ s/^(\w+)\.sam$/$1/;
+
+# Assign default values
+if(exists $options{o}){
+	$outdir = $options{w}; 
+}else{
+	$outdir = "$def_outdir" . "particles";
+}
+
+# Make output directory if doesnt exist
+
+if (-e $outdir){
+	print "$outdir exists\n";
+}else{
+	my $cwd = getcwd;
+	print "making directory $cwd/$outdir\n";
+	mkdir "$cwd/$outdir";
+}
 
 if(exists $options{w}){
 	$pwind = $options{w}; 
@@ -84,7 +105,6 @@ foreach (@psizes){
 	print "Bins at: $_ bp\n";
 }
 
-
 ################################################################################
 # main program
 ###############################################################################
@@ -93,8 +113,6 @@ my $phigh;
 my $plow;
 my @handles;
 
-# get the relevant info from the input file name
-(my $prefix = $infile) =~ s/^\.sam//;
 
 # print out some useful info
 print ("\nFiltering '".$infile."' to particle size:\n");
@@ -103,7 +121,8 @@ print ("\nFiltering '".$infile."' to particle size:\n");
 # nick alters to make $pwind a percentage of the particle size
 open(IN, "$infile") || die "Unable to open $infile: $!";
 foreach my $psize (@psizes){
-        open $handles[$psize], '>', "$outdir/$prefix.$psize" || die "Unable to open outfile: $!";
+	print "Opening: $outdir/$prefix" . "_$psize.txt\n"; 
+        open ($handles[$psize], '>', "$outdir/$prefix" . "_$psize.txt") or die "Unable to open outfile: $!";
 }
 
 while(<IN>){
@@ -125,9 +144,7 @@ while(<IN>){
                && (($line[8] > $plow && $line[8] < $phigh)
                    || ($line[8] < (-$plow) && $line[8] > (-$phigh)))){
                     
-    			  # removed write out to filtered file (.fil)
-               
-                    # write out the dyad position data to the position file
+                # write out the dyad position data to the position file
                 if($line[8] > 0){
                   my $pos = ($line[3] + ($line[8] * 0.5));
                   select $handles[$psize];
