@@ -18,7 +18,7 @@ while(<SGRIN>){
 
         if ($line[0] ne $chr){ 
 		# New chromosome line
-		print "fixedStep chrom=$line[0] start=0 step=10 span=10\n";
+		print "fixedStep chrom=$line[0] start=1 step=10 span=10\n";
 		$chr = $line[0];
 		print STDOUT "## Processing: $line[0]\n";
 		print "$line[2]\n";

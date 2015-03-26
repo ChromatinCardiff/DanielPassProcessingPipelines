@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # Written by: Steff Adams, May 2010
-# 
+#
 # Altered to read .sam files (change from original ELAND input) 8th June 2010: Nick Kent
 # Altered to output only the .txt file 13th Sept 2010: Nick Kent
 # Last fiddled with: Nick Kent, Aug 2011
@@ -8,21 +8,21 @@
 #
 # Usage: perl SAMparser.pl
 #
-# This script takes the chrn_info.txt files from chrgrep.sh and calculates the 
-# centre positions of the paired reads for each chromosome within user-defined 
+# This script takes the chrn_info.txt files from chrgrep.sh and calculates the
+# centre positions of the paired reads for each chromosome within user-defined
 # size classes (+/- a user-defined window).
 #
 # The script takes configuration input from two sub files:
 #
 # 1. config.txt: modify this file to set in and out directory paths and the pwind
 # variable. pwind = "particle window" - this is best left at 0.2 which means that
-# the script will define particles +/- 20% of a specified size class. e.g 150bp 
-# particles will be defined as having an ISIZE/end-to-end distance of between 120 
+# the script will define particles +/- 20% of a specified size class. e.g 150bp
+# particles will be defined as having an ISIZE/end-to-end distance of between 120
 # and 180bp. You will notice that the pwind variable widens the size selection as
 # the size class increases. This is important to encompass variation in linker length
 # when dealing with poly-nucleosomes. The choice of 0.2 also prevents Part50, Part 100,
 # Part150 and Part300 classes from overlapping. This is probably not important
-# but prevents double counting within these functionally important size classes 
+# but prevents double counting within these functionally important size classes
 #
 # 2. particle_size_range.txt: sets the particle sizes; simply input numbers delimited
 # with commas.
@@ -30,7 +30,7 @@
 # You will also need to set the $SAM_ID_flag variable as in SAMhistogram.pl
 #
 ################################################################################
-use strict; 
+use strict;
 use warnings;
 use Cwd;
 
@@ -48,12 +48,12 @@ if (!%options){
 }
 
 ################################################################################
-# SET THE VARIABLES BELOW AS REQUIRED
+# Parameter set up
 ################################################################################
 
-my $infile = $options{i}; 
+my $infile = $options{i};
 my $SAM_ID_flag = $options{f};
-my $outdir; 
+my $outdir;
 my @psizes;
 my $pwind;
 
@@ -64,13 +64,12 @@ my $def_outdir = $1;
 
 # Assign default values
 if(exists $options{o}){
-	$outdir = $options{w}; 
+	$outdir = $options{w};
 }else{
 	$outdir = "$def_outdir" . "particles";
 }
 
 # Make output directory if doesnt exist
-
 if (-e $outdir){
 	print "$outdir exists\n";
 }else{
@@ -80,15 +79,15 @@ if (-e $outdir){
 }
 
 if(exists $options{w}){
-	$pwind = $options{w}; 
+	$pwind = $options{w};
 }else{
 	$pwind = 0.2;
 }
 
 if(exists $options{p}){
-	@psizes = split(',', $options{p}); 
+	@psizes = split(',', $options{p});
 }else{
-	@psizes = qw/0 100 150 300 450/;
+	@psizes = qw/100 150 300 450/;
 }
 
 # Default for for SAM. If using ELAND, pass the -E flag
@@ -121,7 +120,7 @@ print ("\nFiltering '".$infile."' to particle size:\n");
 # nick alters to make $pwind a percentage of the particle size
 open(IN, "$infile") || die "Unable to open $infile: $!";
 foreach my $psize (@psizes){
-	print "Opening: $outdir/$prefix" . "_$psize.txt\n"; 
+	print "Opening: $outdir/$prefix" . "_$psize.txt\n";
         open ($handles[$psize], '>', "$outdir/$prefix" . "_$psize.txt") or die "Unable to open outfile: $!";
 }
 
@@ -131,29 +130,28 @@ while(<IN>){
         chomp($_);
         # split line by delimiter and store elements in an array
         my @line = split('\t',$_);
-    
+
         foreach my $psize (@psizes){
-        
+
             #print $psize."bp\n";
             $phigh = ($psize + ($pwind * $psize));
             $plow = ($psize - ($pwind * $psize));
             my $posfile = $prefix."_".$psize.".txt";
-        
+
             #print "$line[4] $line[8] plow=$plow phigh=$phigh\n";
             if(($line[4] >= $read_one_qual)
                && (($line[8] > $plow && $line[8] < $phigh)
                    || ($line[8] < (-$plow) && $line[8] > (-$phigh)))){
-                    
+
                 # write out the dyad position data to the position file
                 if($line[8] > 0){
                   my $pos = ($line[3] + ($line[8] * 0.5));
                   select $handles[$psize];
+									#Chromosome | dyad start | size | apex position
                   print "$line[2]\t$line[3]\t$line[8]\t$pos\n";
                 }
             }
         }
-    }    
+    }
 }
 close(IN);
-
-
