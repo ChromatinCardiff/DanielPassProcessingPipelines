@@ -2,6 +2,7 @@
 
 <h2>General steps that I've taken. Obviously varies case by case.</h1>
 
+<h3>From FASTQ to SGR</h3>
 <b>Bowtie command</b>
 ```
 bowtie -v 3 --trim3 14 --maxins 5000 --fr -k 1  -p 12 --sam indexes/TAIR10 -1 ES10_TCGGCA_L002_R1_001.fastq -2 ES10_TCGGCA_L002_R2_001.fastq bowtie1/ES10_50bp.sam -t
@@ -34,6 +35,32 @@ awk '{arr[$2]+=$1} END {for (key in arr) printf("%s\t%s\n", key, arr[key])}' tem
 ```
 Use basic_smooth-norm.r to chart
 
+<b>Generate SGR files</b>
+```
+sgr_builder.pl -i infile_150.txt -o outfile.sgr -p At_chr_sizes.txt
+
+$ At_chr_sizes.txt
+  Chr1	1251
+	Chr2	55324
+	Chr3	9876
+	ABC		123
+```
+
+<h3>Using danpos</h3>
+
+<convert
+<b>Identify peaks</b>
+```
+# Numbers are reads which mapped to genome
+danpos.py dpos ES09_150.wig,ES10_150.wig,ES11_150.wig,ES12_150.wig,ES13_150.wig,ES14_150.wig,ES15_150.wig,ES16_150.wig -o results_individually_normalised -c ES09_150.wig:112949625,ES10_150.wig:120774176,ES11_150.wig:107892210,ES12_150.wig:48206863,ES13_150.wig:75281419,ES14_150.wig:103625083,ES15_150.wig:95355763,ES16_150.wig:102368487
+```
+<b>Annotate positions by gene feature</b>
+```
+# Make sure chromosome labels EXACTLY match the genepred file! Case sensitive, fails with div0 error.
+danpos.py profile results_individually_normalised/pooled/ES09_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES10_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES11_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES12_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES13_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES14_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES15_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES16_150.Fnor.smooth.wig --genefile_paths ../../ACS/reference_data/at_tair10_mod.genepred --flank_up 500
+```
+
+<h2>MISC</h2>
 <b>Job submission to slurm cluster</b>
 ```
 sbatch slurm_submission.sh

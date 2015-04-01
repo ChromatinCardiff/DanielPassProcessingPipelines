@@ -9,7 +9,8 @@ my ($file, $column, $ml, $value, $del) = @ARGV;
 if (not defined $del){
 	$del = "\t";
 }
-if(not defined $file or $column or $ml or $value){
+
+if(not defined $file || $column || $ml || $value){
 	print "$usage## inputs are missing: file: $file, column: $column, operator: $ml, value: $value\n" and die;
 }
 
@@ -17,11 +18,11 @@ open INFILE, $file or die "can't open input file\n";
 while (my $line = <INFILE>){
 	chomp($line);
 	my @l = split($del, $line);
-	if ($ml == 'gt'){
+	if ($ml eq 'gt'){
 		if ($l[$column] > $value){
 			print "$line\n";
 		}
-	}elsif($ml == 'lt'){
+	}elsif($ml eq 'lt'){
 		if ($l[$column] < $value){
 			print "$line\n";
 		}
