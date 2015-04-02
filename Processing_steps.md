@@ -14,6 +14,7 @@ SAMparser2.pl -i infile.sam -o outdirectory -f HISEQ -p 0,80,150,350,500,680,860
 ```
 
 <b>To extract Chromosomes from sam file (not cleverly)</b>
+
 ```
 chr_split.sh
 	grep -w 'Chr1' ES16.sam >Chr1_grep.txt &
