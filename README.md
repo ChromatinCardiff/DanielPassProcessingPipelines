@@ -1,4 +1,4 @@
-<h2>Repository of scripts that I've made/appropriated and general tidbits. Obviously varies case by case, but core steps I followed are:</h2>
+<b>Repository of scripts that I've made/appropriated and general tidbits. Obviously varies case by case, but core steps I followed are:</b>
 
 <h3>From FASTQ to SGR</h3>
 <b>Bowtie command</b>
