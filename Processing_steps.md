@@ -1,6 +1,4 @@
-# DansProcessingPipeline
-
-<h2>General steps that I've taken. Obviously varies case by case.</h1>
+<h2>General steps that I've taken. Obviously varies case by case.</h2>
 
 <h3>From FASTQ to SGR</h3>
 <b>Bowtie command</b>
@@ -49,7 +47,10 @@ $ At_chr_sizes.txt
 
 <h3>Using danpos</h3>
 
-<convert
+<b>Convert sgr to wig</b>
+```
+sgr2wig.pl inputfile.sgr outputfile.wig
+```
 <b>Identify peaks</b>
 ```
 # Numbers are reads which mapped to genome
@@ -61,7 +62,7 @@ danpos.py dpos ES09_150.wig,ES10_150.wig,ES11_150.wig,ES12_150.wig,ES13_150.wig,
 danpos.py profile results_individually_normalised/pooled/ES09_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES10_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES11_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES12_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES13_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES14_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES15_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES16_150.Fnor.smooth.wig --genefile_paths ../../ACS/reference_data/at_tair10_mod.genepred --flank_up 500
 ```
 
-<h2>MISC</h2>
+<h3>MISC</h3>
 <b>Job submission to slurm cluster</b>
 ```
 sbatch slurm_submission.sh
