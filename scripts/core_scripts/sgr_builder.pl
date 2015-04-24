@@ -93,31 +93,3 @@ for my $chr (sort keys %binhash){
     print OUT "$chr\t$binout\t$binhash{$chr}{$binout}\n";
   }
 }
-
-
-# # Calculate the 3 bin moving average
-# my @moving_ave;
-# my $ma = 0;
-# my $count = 1;
-# push (@moving_ave,0);
-#
-# while ($count<$bin_no-1){
-#   $ma = (($dist_freq[$count--] + $dist_freq[$count] + $dist_freq[$count++])/3);
-#   push (@moving_ave,$ma);
-#   $count ++;
-# }
-# push (@moving_ave,0);
-#
-#
-#
-#
-#
-# # print required data in tab-delimited format to output file
-# # NK modifies to output chrn, bin and ma only
-# for ($i=0; $i<$bin_no; $i++){
-#
-#   print(OUT "chr".$n."\t".($i*$bin_width)."\t".round($moving_ave[$i])."\n");
-# }
-#
-# # close out file handle
-# close(OUT);
