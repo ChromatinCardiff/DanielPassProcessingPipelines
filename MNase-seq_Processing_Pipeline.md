@@ -1,4 +1,3 @@
-<b>Repository of scripts that I've made/appropriated and general tidbits. Obviously varies case by case, but core steps I followed are:</b>
 
 <h3>From FASTQ to SGR</h3>
 <b>Bowtie command</b>
@@ -59,10 +58,4 @@ danpos.py dpos ES09_150.wig,ES10_150.wig,ES11_150.wig,ES12_150.wig,ES13_150.wig,
 ```
 # Make sure chromosome labels EXACTLY match the genepred file! Case sensitive, fails with div0 error.
 danpos.py profile results_individually_normalised/pooled/ES09_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES10_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES11_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES12_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES13_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES14_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES15_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES16_150.Fnor.smooth.wig --genefile_paths ../../ACS/reference_data/at_tair10_mod.genepred --flank_up 500
-```
-
-<h3>MISC</h3>
-<b>Job submission to slurm cluster</b>
-```
-sbatch slurm_submission.sh
 ```
