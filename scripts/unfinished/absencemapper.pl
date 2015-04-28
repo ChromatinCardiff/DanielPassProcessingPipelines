@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# Daniel Pass daniel.antony.pass@googlemail.com 16/04/2015
+# Daniel Pass | daniel.antony.pass@googlemail.com | 16/04/2015
 
 use strict;
 use warnings;
@@ -10,17 +10,13 @@ use warnings;
 ##############################
 use Getopt::Std;
 my %options=();
-getopts('i:o:m:t:b:IRN', \%options);
+getopts('i:o:m:t:b:IRNh', \%options);
 my $sep = "~~~\n";
 
 my $usage = "\nAbsenceMapper is used to identify regions of a mapped genome which don't demonstrate any endpoints of sequencing reads. This could be useful when determining differential degradation from MNase-seq experiments, but also identifying unmappable regions or missed sections in low coverage sequencing.\n\
-USAGE: absencemapper.pl -i infile.sam [REQUIRED]\n[OPTIONAL]\n  -o [outdir | default: .]\n  -m [min gap to report | Default: 50]\n  -t [Threshold for cut site to count (options: LQ/MEDIAN/UQ or integer) | default: LQ]\n  -b [binsize | default: 5]\n  -n [Noise level to ignoreIgnore singletons at gap determination and mag calculation]\n  -R [Suppres SAM parsing/cutfile generation]\n  -N [Do not normalise cut intensity by dataset mean (default: Normalise)]\n\n  -h Prints this helpful usage list and exits\n\nNOTE: [-R] reduces processing time but assumes files are in correct outdir and no change to names\n";
+USAGE: absencemapper.pl -i infile.sam [REQUIRED]\n[OPTIONAL]\n  -o [outdir | default: .]\n  -m [min region size to report | Default: 50]\n  -t [Threshold for reads bound to cut site to count (options: LQ/MEDIAN/UQ or integer) | default: LQ]\n  -b [binsize | default: 5]\n  -n [Noise level to ignore at gap determination and mag calculation | default 1]\n  -R [Suppres SAM parsing/cutfile generation]\n  -N [Do not normalise cut intensity by dataset mean | default: False]\n\n  -h Prints this helpful parameter list and exits\n\nNOTE: [-R] reduces processing time but assumes files are in correct outdir and no change to names\n";
 
-if (!%options){
-	print "$usage$sep" and die;
-}
-
-if ($options{h}){
+if ((!%options) or ($options{h})){
 	print "$usage$sep" and die;
 }
 
@@ -29,7 +25,7 @@ my $infile = $options{i};
 (my $prefix = $infile) =~ s/\.sam//;
 
 # Assign defaults
-my ($outdir, $cutoutfile, $gapoutfile, $mingap, $minmag, $binsize);
+my ($outdir, $cutoutfile, $gapoutfile, $mingap, $thresh, $binsize);
 
 # Out directory
 if(exists $options{o}){
@@ -48,9 +44,9 @@ if(exists $options{m}){
 
 # Min magnitude of cut size to count
 if(exists $options{t}){
-	$minmag = $options{t};
+	$thresh = $options{t};
 }else{
-	$minmag = "LQ";
+	$thresh = "LQ";
 }
 
 # Bin size for cutsites
@@ -60,12 +56,14 @@ if(exists $options{b}){
 	$binsize = 5;
 }
 
+## RUN PROGRAM
+
 # Print parameters to screen
 print $sep;
 print "Input____________________________________________$infile\n";
 print "Output directory_________________________________$outdir\n";
 print "Minimum distance between cuts to report__________$mingap\n";
-print "Minimum cuts at site required____________________$minmag\n";
+print "Minimum cuts at site required____________________$thresh\n";
 print "Size of bin for each cutsite_____________________$binsize\n";
 print "Ignore singletons?_______________________________"; if(exists($options{I})){print "Yes\n";}else{print "No\n";};
 print "Normalise data by readcount per chromosome?______"; if(!exists($options{N})){print "Yes\n";}else{print "No\n";};
@@ -127,7 +125,7 @@ if(!exists $options{R}){
 		my $decount;
 
 		for my $chr (keys %cuthash){
-			while (my ($pos, $value) = each %cuthash{$chr}){
+			while (my ($pos, $value) = each %{ $cuthash{$chr} }){
 				#	print "$key1\t$key2\t$value\n";
 				if ($value > 1){
 					$desinghash{$chr}{$pos} = $value;
@@ -145,11 +143,11 @@ if(!exists $options{R}){
 
 	my ($LQ,$MED,$UQ,$MININT);
 
-	if ($minmag =~ /^d+$/){
-		$MININT = $minmag;
+	if ($thresh =~ /^d+$/){
+		$MININT = $thresh;
 	}
 
-	$cutoutfile = "$prefix" . "cuts_$minmag.txt";
+	$cutoutfile = "$prefix" . "_cuts_$thresh.txt";
 	open(CUTOUT, '>', "$outdir/$cutoutfile") or die "Unable to open $cutoutfile: $!";
 	select(CUTOUT);
 	# Export bin counts per chromosome;
@@ -164,14 +162,14 @@ if(!exists $options{R}){
 		my $MED = $sortvals[int(0.5 * $max)];
 		my $UQ = $sortvals[int(0.75 * $max)];
 
-		if ($minmag =~ /LQ/){
+		if ($thresh =~ /LQ/){
 			$MININT = $LQ;
-		}elsif ($minmag =~ /MED/){
+		}elsif ($thresh =~ /MED/){
 			$MININT = $MED;
-		}elsif ($minmag =~ /UQ/){
+		}elsif ($thresh =~ /UQ/){
 			$MININT = $UQ;
 		}
-		print STDOUT "$chr\tQuartile Range (x10^-6):\tLQ:" . sprintf("%.3f",$LQ) . "\tMEDIAN:" . sprintf("%.3f",$MED) . "\tUQ:" . sprintf("%.3f",$UQ) . "\tSelected: $minmag(" . sprintf("%.3f",$MININT) . ")\n";
+		print STDOUT "$chr\tQuartile Range (x10^-6):\tLQ:" . sprintf("%.3f",$LQ) . "\tMEDIAN:" . sprintf("%.3f",$MED) . "\tUQ:" . sprintf("%.3f",$UQ) . "\tSelected: $thresh(" . sprintf("%.3f",$MININT) . ")\n";
 
 	  for my $cutsite (sort {$a <=> $b} keys %{$cuthash{$chr}}){
 			if ($cuthash{$chr}{$cutsite} >= $MININT){
@@ -196,34 +194,34 @@ if(exists $options{R}){
 	print $sep;
 }
 
-$gapoutfile = "$prefix" . "_gaps_$minmag.txt";
+$gapoutfile = "$prefix" . "_gaps_$thresh.gff";
 ## Identify gapped regions
 open(GAPOUT, '>', "$outdir/$gapoutfile") or die "Unable to open $outdir/$gapoutfile: $!";
 
-my ($previous,$current) = 0;
+my ($start,$end) = 0;
 
 select(GAPOUT);
 my $gapcounttotal;
-print "Chr\tStart\tEnd\tSize\n";
+print "##gff-version 3\n";
 for my $chr (sort keys %cuthash){
 	print STDOUT "Processing $chr for cut-free regions\n";
 	my $gapcountchr;
 	for my $cutsite (sort {$a <=> $b} keys %{$cuthash{$chr}}){
 		$gapcounttotal++;
-		$current = $cutsite;
-	  my $gap = $current - $previous;
+		$end = $cutsite;
+	  my $gap = $end - $start;
 
 		if ($gap > $mingap){
-	    print "$chr\t$previous\t$current\t$gap\n";
+	    print "$chr\tProtDNA\texon\t$start\t$end\t.\t.\t.\n";
 			$gapcountchr++;
 	  }
-	  $previous = $cutsite;
+	  $start = $cutsite;
 	}
 	print STDOUT "$chr\tCut free regions: $gapcountchr\n";
 }
 select STDOUT;
 print $sep;
-print "$infile reports $gapcounttotal cut free regions\n";
-print "Output:\nCutsite file: $cutoutfile\nIdentified gaps file: $gapoutfile\n";
+print "$infile reports $gapcounttotal cut free regions $thresh\n";
+print "Output:\n--Cutsite file:\t$cutoutfile\n--Gaps file:\t$gapoutfile\n";
 print $sep;
 print "Job done!\n";
