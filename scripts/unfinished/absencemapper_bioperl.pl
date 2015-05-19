@@ -4,6 +4,7 @@
 
 use strict;
 use warnings;
+use Bio::DB::Sam;
 
 ##############################
 # Get options
@@ -91,27 +92,32 @@ my $desinghashsize;
 
 if(!exists $options{R}){
 	print "Reading SAM file\n$sep";
-	open(IN, "<", "$infile") || die "Unable to open $infile: $!";
+  my $sam = Bio::DB::Sam->new(-bam  =>"$infile");
 
-	my (@metadata, $sum);
-
-  print "Filtering non-mapped reads\n";
-
-	while(my $line = <IN>){
-		# Ignore metadata
-		if($line =~ /^@/){
-			push(@metadata, $line);
-		}else{
-			# split line by delimiter and store elements in an array
-			my @line = split('\t',$line);
-			# Ignore '*' failures
-			if ($line[2] ne '*'){
-				my $bin = (int($line[7]/ $binsize) * $binsize);
-				# Build hash when endpoint is in bin
-				++$cuthash{$line[2]}{$bin};
-			}
-		}
-	}
+  while (my $align = $sam->
+  my $iterator     = $segment->features(-iterator=>1);
+  while (my $align = $iterator->next_seq) { do something }
+	# open(IN, "<", "$infile") || die "Unable to open $infile: $!";
+  #
+	# my (@metadata, $sum);
+  #
+  # print "Filtering non-mapped reads\n";
+  #
+	# while(my $line = <IN>){
+	# 	# Ignore metadata
+	# 	if($line =~ /^@/){
+	# 		push(@metadata, $line);
+	# 	}else{
+	# 		# split line by delimiter and store elements in an array
+	# 		my @line = split('\t',$line);
+	# 		# Ignore '*' failures
+	# 		if ($line[2] ne '*'){
+	# 			my $bin = (int($line[7]/ $binsize) * $binsize);
+	# 			# Build hash when endpoint is in bin
+	# 			++$cuthash{$line[2]}{$bin};
+	# 		}
+	# 	}
+	# }
 	close(IN);
 
 	## Full hashsize

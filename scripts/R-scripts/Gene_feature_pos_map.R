@@ -1,21 +1,32 @@
 library(ggplot2)
 library(data.table)
-require(scales)
+library(scales)
 library(reshape2)
 library(plyr)
+install.packages("vegan")
 library(vegan)
 
 # Read in
-x <- read.table("~/Projects/ALD/old_vs_new/combined_TSS.txt", header=TRUE, sep=",")
+x <- read.table("~/Projects/ALD/MNase-seq/old_vs_new/combined_TSS.txt", header=TRUE, sep=",")
 summary(x)
 
+x1 <- read.table("~/Projects/ACS/analysis/dpos/profile_TSS_heatmap/TSS_full_uniq.txt", header=TRUE)
+rownames(x1) <-x1$name
+x1[,1] <- NULL
+x2<-colMeans(x1, na.rm=TRUE)
+x2$pos <-as.numeric(colnames(y1))
+x.melt <-melt(x2)
+x.melt2 <-na.omit(x.melt)
+
 # Read extra datasets
-y1 <- read.table("~/Projects/ACS/analysis/dpos/profile_TSS_heatmap/tmp.txt", header=FALSE)
-rownames(y1) <-y1[,1]
+y1 <- read.table("~/Projects/ACS/analysis/dpos/profile_TSS_heatmap/TSS_full_uniq_masked.txt", header=TRUE)
+rownames(y1) <-y1$name
 y1[,1] <- NULL
-y1$mean <- rowMeans(y1)
-rownames(y2) <-rownames(y1)
-y2 <- cbind(mean=y1$mean)
+y2<-colMeans(y1, na.rm=TRUE)
+y2$pos <-as.numeric(colnames(y1))
+y.melt <-melt(y2)
+y.melt2 <-na.omit(y.melt)
+
 
 # Processing
 rownames(x) <-x$pos
