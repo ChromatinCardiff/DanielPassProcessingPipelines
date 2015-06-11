@@ -124,3 +124,6 @@ p +
   scale_x_continuous(breaks = pretty_breaks(n=12)) +
   geom_vline(x=0, colour="blue") +
   labs(title = "'Marg'", x = "Position from TSS")
+
+
+## Single gene

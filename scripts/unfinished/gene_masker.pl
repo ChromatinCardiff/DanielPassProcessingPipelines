@@ -1,16 +1,18 @@
 #!/usr/bin/perl
 
 use strict;
-#use warnings;
+use warnings;
 
 use Getopt::Std;
 my %options=();
-getopts('i:o:m:x:', \%options);
+getopts('i:o:m:x:f:', \%options);
 
 my $usage = "gene_masker.pl -i input.txt [form: cols-positions, rows-genes] -o outfile.txt \
-[optional] -g annotations.genepred [genepred annotations] ~~OR~~ -m genemask.txt\n";
+[optional] -g annotations.genepred [genepred annotations] ~~OR~~ -m genemask.txt, -f AT2G07732 [Force gene name, ignore first colum (useful if input is one gene from multiple samples)]\n";
 
-#my $outfile = $options{o};
+
+open(IN, '<', $options{i}) or die "$usage:$!";
+open(OUTFILE, '>', $options{o}) or die "$usage:$!";
 my %maskhash;
 
 if (exists $options{m}){
@@ -21,8 +23,6 @@ if (exists $options{m}){
     $maskhash{$line[0]} = $line[1];
   }
 }
-
-open(IN, '<', $options{i}) or die "$usage:$!";
 
 my $window = 5000;
 my $offset = 1500;
@@ -60,16 +60,25 @@ if (exists $options{g}){
 }
 
 my $header = <IN>;
+select(OUTFILE);
 print $header;
 
 while (<IN>){
   chomp;
   my @gene = split('\s', $_);
-  if (exists $maskhash{$gene[0]}){
+  my $genename;
+  
+  if (exists $options{f}){
+    $genename = $options{f};
+  }else{
+    $genename = $gene[0]
+  }
+
+  if (exists $maskhash{$genename}){
     print "$gene[0]";
     print "\tNA" x ($offset /$binsize);
 
-    my @pos = (split '', $maskhash{$gene[0]});
+    my @pos = (split '', $maskhash{$genename});
     my $pinc = 0;
     while ($pinc <= $window){
       if ($pos[$pinc] == 1){
@@ -81,5 +90,7 @@ while (<IN>){
       $pinc += $binsize;
     }
     print "\n";
+  }else{
+    print STDOUT "Gene $genename doesnt exist in exon mask file\n";
   }
 }
