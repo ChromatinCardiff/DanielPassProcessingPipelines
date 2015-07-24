@@ -1,10 +1,15 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
-use Math::Round;
-##############################
+
+##################################################
+## Daniel Pass | github.com/passdan | July 2015 ##
+##################################################
+
+
 # Get options
-##############################
+
+use Math::Round;
 use Getopt::Std;
 my %options=();
 getopts('i:b:o:h', \%options);
@@ -42,6 +47,8 @@ if (exists $options{o}){
 if(exists $options{b}){
 	$binsize = $options{b};
 }
+
+# Run script
 
 while(my $line = <IN>){
   # split line by delimiter and store elements in an array
