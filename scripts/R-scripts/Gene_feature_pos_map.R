@@ -39,7 +39,7 @@ p <- ggplot(data=x.dec)
 p1 <- p + 
   geom_line(aes(x=pos, y=ES09_150)) +
   geom_line(aes(x=pos, y=ES13_150)) +
-  geom_line(aes(x=pos, y=Marg)) +
+  geom_line(aes(x=pos, y=Marg_150)) +
   scale_x_continuous(breaks = pretty_breaks(n=12)) +
   geom_vline(x=0, colour="blue") +
   labs(title = "Light Grown, Low MNase", x = "Position from TSS", y = "Normalised abundance (Hellinger)")
@@ -96,9 +96,9 @@ p +
 # All datasets
 p2 <-ggplot(data=x.melt)
 p2 +
-  geom_line(aes(x=pos, y=value, colour=variable, )) +
+  geom_line(aes(x=pos, y=value, colour=variable)) +
   scale_x_continuous(breaks = pretty_breaks(n=12)) +
-  scale_colour_brewer(palette="Dark2") +
+  scale_colour_brewer(palette="Paired") +
   geom_vline(x=0, colour="blue")
 
 p + 
@@ -106,10 +106,10 @@ p +
   geom_line(aes(x=pos, y=ES13_150), colour="Red") +     # Low
   geom_line(aes(x=pos, y=ES10_150), colour="Green") +     # High
   geom_line(aes(x=pos, y=ES14_150), colour="Green") +     # High
-  geom_line(aes(x=pos, y=Marg_150), colour="Black", size=2) +
-  geom_line(aes(x=pos, y=AM1_150), colour="Darkblue", size=2) +
-  geom_line(aes(x=pos, y=AM2_150), colour="Darkblue", size=2) +
-  geom_line(aes(x=pos, y=AM3_150), colour="Darkblue", size=2) +
+  geom_line(aes(x=pos, y=Marg_150), colour="Black") +
+  geom_line(aes(x=pos, y=AM1_150), colour="Darkblue", ) +
+  geom_line(aes(x=pos, y=AM2_150), colour="Darkblue") +
+  geom_line(aes(x=pos, y=AM3_150), colour="Darkblue") +
   scale_x_continuous(breaks = pretty_breaks(n=12)) +
   geom_vline(x=0, colour="blue") +
   labs(title = "Light Grown", x = "Position from TSS", y = "Normalised abundance (Hellinger)")
@@ -125,5 +125,14 @@ p +
   geom_vline(x=0, colour="blue") +
   labs(title = "'Marg'", x = "Position from TSS")
 
+# Normalise by 1st nucleosome
+x0norm <- x / x[51, , drop=TRUE]
+x0norm$pos <- rownames(x0norm)
+x.melt <- melt(x0norm, id=c("pos"))
 
-## Single gene
+p2 <-ggplot(data=x.melt)
+p2 +
+  geom_line(aes(x=as.numeric(pos), y=value, colour=variable)) +
+  scale_x_continuous(breaks = pretty_breaks(n=12)) +
+  scale_colour_brewer(palette="Paired") +
+  geom_vline(x=0, colour="blue")

@@ -23,17 +23,15 @@ my $cut;
 
 print "Mapping cutsites\n";
 for my $a (@NATalignments){
-  if ($a->qual == 255){
-    #print $a->qual . "\t" . $a->flag . "\n";
-    if (($a->flag & 64) or ($a->flag & 80)){
-      $cut = $a->start;
-    #  print "$cut\n";
-      ++$nathash{$a->seq_id}{$a->start};
-    }elsif (($a->flag & 128) or ($a->flag & 144)){
-      $cut = $a->end;
-    #  print "$cut\n";
-      ++$nathash{$a->seq_id}{$a->end};
-    }
+  #print $a->qual . "\t" . $a->flag . "\n";
+  if (($a->flag & 64) or ($a->flag & 80)){
+    $cut = $a->start;
+  #  print "$cut\n";
+    ++$nathash{$a->seq_id}{$a->start};
+  }elsif (($a->flag & 128) or ($a->flag & 144)){
+    $cut = $a->end;
+  #  print "$cut\n";
+    ++$nathash{$a->seq_id}{$a->end};
   }
   # Build hash when endpoint is in bin
   #my $bin = (int($cut/ $binsize) * $binsize);
