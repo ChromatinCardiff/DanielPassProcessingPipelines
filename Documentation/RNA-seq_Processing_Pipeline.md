@@ -7,9 +7,14 @@ Lots of information is in http://www.nature.com/nprot/journal/v7/n3/full/nprot.2
 /home/GROUP-smbpk/sbi6dap/localbin/tophat2 -p 32 -G /home/GROUP-smbpk/sbi6dap/working/RNA-seq/working/genes.gtf -o ES20_THout /home/GROUP-smbpk/sbi6dap/working/RNA-seq/working/genome fastqs/ES20_R1.fastq fastqs/ES20_R2.fastq
 ```
 
-<h3>Isoform examination with cufflinks</h3>
+<h3>Transcriptome analysis cufflinks</h3>
 ```
 /home/GROUP-smbpk/sbi6dap/localbin/cufflinks -g /home/GROUP-smbpk/sbi6dap/working/RNA-seq/working/genes.gtf -b /home/GROUP-smbpk/sbi6dap/working/RNA-seq/working/genome.fa -p 32 -o /home/GROUP-smbpk/sbi6dap/working/RNA-seq/working/CL-annot/ES8_CLout /home/GROUP-smbpk/sbi6dap/working/RNA-seq/working/TH/ES8_THout/accepted_hits_ES8.bam
+```
+
+<h4>Create</h4>
+```
+cuffcompare -s genome.fa -CG -R -V -r genes.gtf CL-annot/ES5_CLout-Gtest/ES5_CLout-Gtest-transcripts.gtf CL-annot/ES2_CLout-Gtest/ES2_CLout-Gtest-transcripts.gtf CL-annot/ES6_CLout-Gtest/ES6_CLout-Gtest-transcripts.gtf CL-annot/ES3_CLout-Gtest/ES3_CLout-Gtest-transcripts.gtf CL-annot/ES7_CLout-Gtest/ES7_CLout-Gtest-transcripts.gtf CL-annot/ES1_CLout-Gtest/ES1_CLout-Gtest-transcripts.gtf CL-annot/ES4_CLout-Gtest/ES4_CLout-Gtest-transcripts.gtf CL-annot/ES8_CLout-Gtest/ES8_CLout-Gtest-transcripts.gtf
 ```
 
 <h3>TSS prediction (aka pulling mapped primary isoform start sites)</h3>

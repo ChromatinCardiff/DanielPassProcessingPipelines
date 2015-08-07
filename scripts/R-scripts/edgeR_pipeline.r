@@ -6,8 +6,11 @@ counts = readDGE(samples$countf)$counts
 
 noint = rownames(counts) %in% c("no_feature","ambiguous","too_low_aQual","not_aligned","alignment_not_unique")
 cpms = cpm(counts)
-keep = rowSums(cpms >1) >=4 & !noint
-counts = counts[keep,]
+
+# Filter out <1 counts per million          ##############################
+keep = rowSums(cpms >1) >=4 & !noint        #### ONLY DO IF FILTERING ####
+counts = counts[keep,]                      #### ONLY DO IF FILTERING ####
+# OR dont filter anything                   ##############################
 
 colnames(counts) = samples$shortname
 head(counts[,order(samples$condition)], 5)
@@ -23,7 +26,7 @@ d = estimateTagwiseDisp(d)
 plotMeanVar(d, show.tagwise.vars=TRUE, NBline=TRUE)
 plotBCV(d)
 
-de = exactTest(d, pair=c("16h-Light", "16h-Dark"))
+de = exactTest(d, pair=c("16h-Light", "16h-Dark"))        ## AKA Fischers exact test
 
 tt = topTags(de, n=nrow(d))
 head(tt$table)
@@ -33,4 +36,4 @@ head(nc[rn,order(samples$condition)],5)
 
 deg = rn[tt$table$FDR < .05]
 plotSmear(d, de.tags=deg)
-write.csv(tt$table, file="toptags_edgeR.csv")
+write.csv(tt$table, file="alltags_edgeR.csv")

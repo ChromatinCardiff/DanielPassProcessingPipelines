@@ -3,12 +3,35 @@ library(data.table)
 library(scales)
 library(reshape2)
 library(plyr)
-install.packages("vegan")
 library(vegan)
 
+####################################################################################################################
+###  BASIC CHART  ##################################################################################################
+####################################################################################################################
+
 # Read in
-x <- read.table("~/Projects/ALD/MNase-seq/old_vs_new/combined_TSS.txt", header=TRUE, sep=",")
+x <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks-RNA-guided/diif-expression/all_TSS.csv", header=TRUE, sep="\t")
 summary(x)
+
+# Processing
+rownames(x) <-x$pos
+x.dec <- decostand(x, 'standardize', MARGIN=2)
+x.dec$pos <- as.numeric(rownames(x))
+x.melt <- melt(x.dec, id=c("pos"))
+
+# Chart all columns
+p2 <-ggplot(data=x.melt)
+p2 +
+  geom_line(aes(x=pos, y=value, colour=variable)) +
+  scale_x_continuous(breaks = pretty_breaks(n=12)) +
+  scale_colour_brewer(palette="Paired") +
+  geom_vline(x=0, colour="blue") 
+  geom_vline(x=4500, colour="blue")
+
+####################################################################################################################
+####################################################################################################################
+####################################################################################################################
+
 
 x1 <- read.table("~/Projects/ACS/analysis/dpos/profile_TSS_heatmap/TSS_full_uniq.txt", header=TRUE)
 rownames(x1) <-x1$name
@@ -37,8 +60,8 @@ x.melt <- melt(x.dec, id=c("pos"))
 # Individual biorep plots
 p <- ggplot(data=x.dec)
 p1 <- p + 
-  geom_line(aes(x=pos, y=ES09_150)) +
-  geom_line(aes(x=pos, y=ES13_150)) +
+  geom_line(aes(x=pos, y=ES09_150.lt.25)) +
+  geom_line(aes(x=pos, y=ES10_150.lt.25)) +
   geom_line(aes(x=pos, y=Marg_150)) +
   scale_x_continuous(breaks = pretty_breaks(n=12)) +
   geom_vline(x=0, colour="blue") +

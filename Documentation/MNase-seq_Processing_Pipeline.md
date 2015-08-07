@@ -60,6 +60,26 @@ danpos.py dpos ES09_150.wig,ES10_150.wig,ES11_150.wig,ES12_150.wig,ES13_150.wig,
 danpos.py profile results_individually_normalised/pooled/ES09_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES10_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES11_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES12_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES13_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES14_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES15_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES16_150.Fnor.smooth.wig --genefile_paths ../../ACS/reference_data/at_tair10_mod.genepred --flank_up 500
 ```
 
+Annotate gtf file from cufflinks with genenames instead of generic labels and convert to genepred
+```
+# In vim because lazy:
+###IGNORE I THINK :%s/\(gene_id "\)\(.\+\)\("; transcript_id "\).\+\(\.."; FPKM\)/\1\2\3\2\4/
+# To take out only the primary isoform
+awk '{if ($6 == "1000") print $0;}' ES8-transcripts-expressed.gtf >ES8-primary-isoforms-only.gtf
+# TO convert to genepred
+/home/sbi6dap/Projects/3rd_party_packages/UCSCtools/gtfToGenePred -genePredExt $i $i.genepred
+rename 's/gtf.//' *
+```
+#danpos with RNA positions, only expressed genes
+danpos.py profile results_individually_normalised/pooled/ES11_150.Fnor.smooth.wig --genefile_paths ES8-primary-isoforms-only.genepred --flank_up 500
+
+#join samples
+```
+paste ES*TSS.xls |cut -f1,2,4,6,8,10,12,14,16 | sed 's/results_individually_normalised\/pooled\///g' | sed 's/.Fnor.smooth.wig.\/home\/sbi6dap\/Projects\/ALD\/RNAseq-annotation-results\//-/g' | sed 's/-primary-only.genepred//g' >all_TSS.csv
+# for multiple RNA exp levels:
+paste ES*TSS.xls |cut -f1,2,3,5,6,8,9,11,12 | sed 's/results_individually_normalised\/pooled\///g' | sed 's/.Fnor.smooth.wig.\/home\/sbi6dap\/Projects\/ALD\/RNAseq-annotation-results\/expression-split-test\/ES3_transcripts-FPKM-/-/g' | sed 's/.genepred.tss//g' >all_TSS.csv
+```
+
 # Subsample BAM file
 ```
 cat <(samtools view -H ES12.bam) <(samtools view -q 255 ES12.bam | shuf -n 10000000) > ES12_10m.sam &
