@@ -1,33 +1,12 @@
 #!/usr/bin/perl
 # Written by: Steff Adams, May 2010
 #
+# Nick Kent
 # Altered to read .sam files (change from original ELAND input) 8th June 2010: Nick Kent
 # Altered to output only the .txt file 13th Sept 2010: Nick Kent
-# Last fiddled with: Nick Kent, Aug 2011
-# Improved speed, added command flags, removed config file requirements, instructions on error, some defaults: Dan Pass, Mar 2015
 #
-# Usage: perl SAMparser.pl
-#
-# This script takes the chrn_info.txt files from chrgrep.sh and calculates the
-# centre positions of the paired reads for each chromosome within user-defined
-# size classes (+/- a user-defined window).
-#
-# The script takes configuration input from two sub files:
-#
-# 1. config.txt: modify this file to set in and out directory paths and the pwind
-# variable. pwind = "particle window" - this is best left at 0.2 which means that
-# the script will define particles +/- 20% of a specified size class. e.g 150bp
-# particles will be defined as having an ISIZE/end-to-end distance of between 120
-# and 180bp. You will notice that the pwind variable widens the size selection as
-# the size class increases. This is important to encompass variation in linker length
-# when dealing with poly-nucleosomes. The choice of 0.2 also prevents Part50, Part 100,
-# Part150 and Part300 classes from overlapping. This is probably not important
-# but prevents double counting within these functionally important size classes
-#
-# 2. particle_size_range.txt: sets the particle sizes; simply input numbers delimited
-# with commas.
-#
-# You will also need to set the $SAM_ID_flag variable as in SAMhistogram.pl
+# Dan Pass, Mar 2015
+# Improved speed, added command flags, removed config file requirements, instructions on error, some defaults:
 #
 ################################################################################
 use strict;
@@ -41,7 +20,15 @@ use Getopt::Std;
 my %options=();
 getopts('i:o:p:w:f:E', \%options);
 
-my $usage = "## USAGE: SAMparser.pl [REQUIRED] -i infile.sam -o outdirectory -f {Flowcell ID} [OPTIONAL] -w {% window (default 0.2)} -p {particle sizes(comma separated, default 0,100,150,300,450)} -E {will change from SAM quality (default) to ELAND}\n";
+my $usage = "## USAGE: Example:$ SAMparser.pl -i infile.sam -o output_directory -f HISEQ
+								[REQUIRED]
+									-i infile.sam
+									-o outdirectory
+									-f {Flowcell ID}
+								[OPTIONAL]
+									-w {% window (default 0.2)}
+									-p {particle sizes(comma separated, default 0,100,150,300,450)}
+									-E {will change from SAM quality (default) to ELAND}\n";
 
 if (!%options){
 	print "~~\n$usage\n~~\n" and die;

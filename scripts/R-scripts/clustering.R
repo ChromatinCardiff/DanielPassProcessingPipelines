@@ -1,12 +1,14 @@
+install.packages("assertthat")
 library(ggplot2)
 library(reshape2)
 library(scales)
 library(assertthat)
-library(kml)
 library(plyr)
 library(vegan)
 
 x <- read.table("/home/sbi6dap/Projects/ACS/analysis/dpos/profile_TSS_heatmap/TSS_full_u.txt", header=TRUE)
+x <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks-standard/profile_TSS_heatmap/genes/light-sigup.tsv", header=TRUE, check.names = FALSE)
+
 
 winsorize <-
   function(x, q=0.01)
@@ -22,13 +24,16 @@ winsorize <-
     x
   }
 
+x.annots <- x[1:4]
+x[,1] <- NULL           ### DO 4 TIMES UNTIL I WORK OUT HOW TO REPEAT!
+
 rownames(x) <- x[,1]
 x$name <-NULL
 x.win <- x
 x.win[, -1] <- sapply(x.win[,-1], winsorize)
 
-x.sub <- subset(x.win, , -c(c(1:3)))
-x.dec <- decostand(x.sub, 'range', MARGIN=1)
+#x.sub <- subset(x.win, , -c(c(1:3)))
+x.dec <- decostand(x.win, 'range', MARGIN=1)
 
 x.samp <- x.dec[sample(row(x.dec), 1000),]
 summary(x.dec)
@@ -55,7 +60,7 @@ head(x.melt, 10)
 
 
 ggplot(x.melt) + 
-  geom_tile(aes(x=variable, y=idsort, fill=value)) + 
+  geom_tile(aes(x=variable, y=id, fill=value)) + 
   scale_fill_gradient2(low="white", high="black") +
   geom_vline(xintercept=150) +
   scale_x_discrete(breaks=c(0, 300, by=10))
@@ -69,12 +74,13 @@ plot(x.mds, type = "p", xlim=c(-0.2,0.25), ylim=c(-0.2,0.3))
 
 ### kml based clustering
 library("longitudinalData")
+install.packages("kml")
 install.packages("rgl")                           # sudo apt-get build-dep r-cran-rgl
 library(rgl)
-install.packages("assertthat")
+library(kml)
 
 
-x.cld <- cld(y6)
+x.cld <- cld(x.samp)
 x.kml <- kml(x.cld,nbRedrawing=3,toPlot="none")
 plotAllCriterion(k.clust)
 summary(x.cld)

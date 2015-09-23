@@ -1,5 +1,6 @@
 library(ggplot2)
 library(data.table)
+library(assertthat)
 library(scales)
 library(reshape2)
 library(plyr)
@@ -15,7 +16,9 @@ summary(x)
 
 # Processing
 rownames(x) <-x$pos
-x.dec <- decostand(x, 'standardize', MARGIN=2)
+x.win <- x
+x.win[, -1] <- sapply(x.win[,-1], winsorize)
+x.dec <- decostand(x.win, 'standardize', MARGIN=2)
 x.dec$pos <- as.numeric(rownames(x))
 x.melt <- melt(x.dec, id=c("pos"))
 
@@ -32,6 +35,11 @@ x.melt25 <- subset(x.melt, grepl("primary25", variable))
 x.melt50 <- subset(x.melt, grepl("primary50", variable))
 x.melt75 <- subset(x.melt, grepl("primary75", variable))
 x.melt100 <- subset(x.melt, grepl("primary100", variable))
+
+x.melt25_2k <- x.melt25[sample(1:nrow(x.melt25), 2000, replace=FALSE),]
+x.melt50_2k <- x.melt50[sample(1:nrow(x.melt50), 2000, replace=FALSE),]
+x.melt75_2k <- x.melt75[sample(1:nrow(x.melt75), 2000, replace=FALSE),]
+x.melt100_2k <- x.melt100[sample(1:nrow(x.melt100), 2000, replace=FALSE),]
 
 # Select columns
 p1 <- ggplot(data=x.melt25) +

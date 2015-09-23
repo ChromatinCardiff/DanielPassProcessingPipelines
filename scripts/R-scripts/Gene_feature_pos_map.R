@@ -10,7 +10,7 @@ library(vegan)
 ####################################################################################################################
 
 # Read in
-x <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks-RNA-guided/diif-expression/all_TSS.csv", header=TRUE, sep="\t")
+x <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks-RNA-guided/mean/mean_profile_TSS_heatmap/ES10_1nucl_align.txt", header=TRUE, sep="\t")
 summary(x)
 
 # Processing
@@ -20,15 +20,18 @@ x.dec$pos <- as.numeric(rownames(x))
 x.melt <- melt(x.dec, id=c("pos"))
 
 # Chart all columns
-p2 <-ggplot(data=x.melt)
-p2 +
+p <-ggplot(data=x.melt)
+p2 <-p +
   geom_line(aes(x=pos, y=value, colour=variable)) +
   scale_x_continuous(breaks = pretty_breaks(n=12)) +
   scale_colour_brewer(palette="Paired") +
-  geom_vline(x=0, colour="blue") 
-  geom_vline(x=4500, colour="blue")
+  geom_vline(x=0, colour="blue", lty=2) +
+  scale_y_continuous(limits=c(-3.5, 3.5)) +
+  #geom_vline(x=4500, colour="blue") +
+  theme(legend.position = "bottom")
 
-####################################################################################################################
+multiplot(p1,p2, cols=1)
+###################################################################################################################
 ####################################################################################################################
 ####################################################################################################################
 

@@ -62,8 +62,6 @@ danpos.py profile results_individually_normalised/pooled/ES09_150.Fnor.smooth.wi
 
 Annotate gtf file from cufflinks with genenames instead of generic labels and convert to genepred
 ```
-# In vim because lazy:
-###IGNORE I THINK :%s/\(gene_id "\)\(.\+\)\("; transcript_id "\).\+\(\.."; FPKM\)/\1\2\3\2\4/
 # To take out only the primary isoform
 awk '{if ($6 == "1000") print $0;}' ES8-transcripts-expressed.gtf >ES8-primary-isoforms-only.gtf
 # TO convert to genepred
@@ -80,8 +78,15 @@ paste ES*TSS.xls |cut -f1,2,4,6,8,10,12,14,16 | sed 's/results_individually_norm
 paste ES*TSS.xls |cut -f1,2,3,5,6,8,9,11,12 | sed 's/results_individually_normalised\/pooled\///g' | sed 's/.Fnor.smooth.wig.\/home\/sbi6dap\/Projects\/ALD\/RNAseq-annotation-results\/expression-split-test\/ES3_transcripts-FPKM-/-/g' | sed 's/.genepred.tss//g' >all_TSS.csv
 ```
 
-# Subsample BAM file
+# Misceleneous stages
+
+<b>Subsample BAM file</b>
 ```
 cat <(samtools view -H ES12.bam) <(samtools view -q 255 ES12.bam | shuf -n 10000000) > ES12_10m.sam &
 samtools view -bS ES12_10m.sam > ES12_10m.bam
+```
+<b>find closest gene feature</b>
+```
+#from bedops
+closest-features --closest RAW_DATA_LightHigh-RAW_DATA_DarkHigh.positions.integrative.sort.bed ~/Projects/reference_data/AT_iGenome_genes.bed >test.bed
 ```
