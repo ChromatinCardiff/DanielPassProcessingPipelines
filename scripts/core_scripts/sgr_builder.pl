@@ -1,31 +1,33 @@
 #!/usr/bin/perl
-# Written by Nick Kent, Jan 2011
-# Fiddled with: Nick Kent, Dec 12th 2011
-# USAGE:- perl Athal_histogramn.pl
-#
-# This script takes the .txt output files from nksamparserpro.pl and calculates a
-# frequency distribution for paired read insert size dyad position values within
-# user-specified bins (defined in the variable $bin_width). It outputs the results
-# as an .sgr file for rendering in IGB.
-#
-# This script replaces nkhistogram.pl which was just soooooooo slow with big files.
-
-# The implementation here is just a simple tally counter. The section starting at
-# Line 57 has been modified (from the original Dicty version) to describe the
-# lengths of each yeast chromosome.
-#
-# Clunky programming, BUT it works!
-################################################################################
 use strict;
 use warnings;
-#use Math::Round;
+
+#################################################################################
+# Written by Nick Kent, Jan 2011
+# Fiddled with: Nick Kent, Dec 12th 2011
+# Editied by Dan Pass 2015 
+#
+# This script takes the .txt output files from SAMparser2.pl and calculates a
+# frequency distribution for paired read insert size dyad position values within
+# user-specified bins (defined in the variable $bin_width). It outputs the results
+# as an .sgr file for rendering in IGB or converting into .wig for danpos.
+#
+################################################################################
+
 use Getopt::Std;
 
 my %options=();
-getopts('i:o:b:p:', \%options);
+getopts('i:o:b:p:A', \%options);
 
-my $usage = "## USAGE: sgr_builder.pl [REQUIRED] -i infile.txt -o outfile.sgr -p {chromosome size file. Format: NAME[tab]size} -b {bin width (default: 10)}\n
-              Parameter file format:\nChr1  10002020\nChr2  1241414\nChr3 1308571\nABCDEFG  123456\n";
+my $usage = "## USAGE: sgr_builder.pl -i infile.txt -o outfile.sgr -p chromosome_sizes.txt
+[REQUIRED] 
+  -i infile.txt 
+  -o outfile.sgr 
+  -p {chromosome size file. Format: NAME[tab]size} 
+[OPTIONAL]
+  -b {bin width (default: 10)}
+  -A Do a three bin average on the data (Default OFF). Also, broken
+NOTE: Parameter file format:\nChr1  10002020\nChr2  1241414\nChr3 1308571\nABCDEFG  123456\n";
 
 if (!%options){
   print "~~\n$usage\n~~\n" and die;
@@ -50,9 +52,9 @@ if(exists $options{p}){
   chomp(@chrsize = <PARA>);
 }
 
-################################################################################
-# MAIN PROGRAM - you should not need to edit below this line
-################################################################################
+################
+# MAIN PROGRAM #
+################
 
 # define some variables
 my ($n, @line);
@@ -85,11 +87,16 @@ while(<IN>){
 }
 close(IN);
 
-open(OUT, '>', $outfile) or die "Unable to open $outfile: $!";
-# Export bin counts per chromosome;
-for my $chr (sort keys %binhash){
-  print "Processing $chr\n";
-  for my $binout (sort {$a <=> $b} keys %{$binhash{$chr}}){
-    print OUT "$chr\t$binout\t$binhash{$chr}{$binout}\n";
+# Calculate the 3 bin moving average
+if (exists $options{A}){
+  print "THIS ISNT DOING AN AVERAGE BECAUSE I DIDNT COME BACK AND IMPLEMENT IT\n";
+}else{
+  open(OUT, '>', $outfile) or die "Unable to open $outfile: $!";
+  # Export bin counts per chromosome;
+  for my $chr (sort keys %binhash){
+    print "Processing $chr\n";
+    for my $binout (sort {$a <=> $b} keys %{$binhash{$chr}}){
+      print OUT "$chr\t$binout\t$binhash{$chr}{$binout}\n";
+    }
   }
 }

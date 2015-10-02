@@ -51,7 +51,7 @@ sgr2wig.pl input.sgr output.wig
 ```
 <b>Identify peaks</b>
 ```
-# Numbers are reads which mapped to genome
+#Numbers are reads which mapped to genome
 danpos.py dpos ES09_150.wig,ES10_150.wig,ES11_150.wig,ES12_150.wig,ES13_150.wig,ES14_150.wig,ES15_150.wig,ES16_150.wig -o results_individually_normalised -c ES09_150.wig:112949625,ES10_150.wig:120774176,ES11_150.wig:107892210,ES12_150.wig:48206863,ES13_150.wig:75281419,ES14_150.wig:103625083,ES15_150.wig:95355763,ES16_150.wig:102368487
 ```
 <b>Annotate positions by gene feature</b>
@@ -59,26 +59,25 @@ danpos.py dpos ES09_150.wig,ES10_150.wig,ES11_150.wig,ES12_150.wig,ES13_150.wig,
 # Make sure chromosome labels EXACTLY match the genepred file! Case sensitive, fails with div0 error.
 danpos.py profile results_individually_normalised/pooled/ES09_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES10_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES11_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES12_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES13_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES14_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES15_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES16_150.Fnor.smooth.wig --genefile_paths ../../ACS/reference_data/at_tair10_mod.genepred --flank_up 500
 ```
-
-Annotate gtf file from cufflinks with genenames instead of generic labels and convert to genepred
+<b>Annotate gtf file from cufflinks with genenames instead of generic labels and convert to genepred</b>
 ```
 # To take out only the primary isoform
 awk '{if ($6 == "1000") print $0;}' ES8-transcripts-expressed.gtf >ES8-primary-isoforms-only.gtf
-# TO convert to genepred
+# To convert to genepred
 /home/sbi6dap/Projects/3rd_party_packages/UCSCtools/gtfToGenePred -genePredExt $i $i.genepred
 rename 's/gtf.//' *
 ```
-#danpos with RNA positions, only expressed genes
+<b>danpos with RNA positions, only expressed genes</b>
 danpos.py profile results_individually_normalised/pooled/ES11_150.Fnor.smooth.wig --genefile_paths ES8-primary-isoforms-only.genepred --flank_up 500
 
-#join samples
+<b>join samples</b>
 ```
 paste ES*TSS.xls |cut -f1,2,4,6,8,10,12,14,16 | sed 's/results_individually_normalised\/pooled\///g' | sed 's/.Fnor.smooth.wig.\/home\/sbi6dap\/Projects\/ALD\/RNAseq-annotation-results\//-/g' | sed 's/-primary-only.genepred//g' >all_TSS.csv
 # for multiple RNA exp levels:
 paste ES*TSS.xls |cut -f1,2,3,5,6,8,9,11,12 | sed 's/results_individually_normalised\/pooled\///g' | sed 's/.Fnor.smooth.wig.\/home\/sbi6dap\/Projects\/ALD\/RNAseq-annotation-results\/expression-split-test\/ES3_transcripts-FPKM-/-/g' | sed 's/.genepred.tss//g' >all_TSS.csv
 ```
 
-# Misceleneous stages
+<h3>Misceleneous stages</h3>
 
 <b>Subsample BAM file</b>
 ```
@@ -89,4 +88,13 @@ samtools view -bS ES12_10m.sam > ES12_10m.bam
 ```
 #from bedops
 closest-features --closest RAW_DATA_LightHigh-RAW_DATA_DarkHigh.positions.integrative.sort.bed ~/Projects/reference_data/AT_iGenome_genes.bed >test.bed
+```
+<b>Align on first nucleosome (or other feature)</b>
+```
+#Find max poin in peak range (default: first 200bp after TSS) and slide trace to align.
+plus1_slider.pl -i ES10_150.Fnor.smooth.wig.heatmap.xls -o ES10_150-1nucl-align
+
+#Alternatively, output the shift values to a file for reuse later (i.e. calculate +1 nucleosome alignment for 150bp data and use the shifts for small particles)
+plus1_slider.pl -i ES10_150.Fnor.smooth.wig.heatmap.xls -o ES10_150-1nucl-align -X 		#create file
+plus1_slider.pl -i ES10_80.Fnor.smooth.wig.heatmap.xls -o ES10_80-1nucl-align -s ES10_150-1nucl-align-shift.txt  #use file instead of denovo calculations
 ```

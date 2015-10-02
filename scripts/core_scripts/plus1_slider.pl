@@ -12,15 +12,16 @@ use warnings;
 
 use Getopt::Std;
 my %options=();
-getopts('i:o:a:b:X', \%options);
+getopts('i:o:a:b:s:X', \%options);
 my $sep = "~~~\n";
 my $usage = "## USAGE:  plus1_slider.pl -i feature_positions.txt
   [REQUIRED]
     -i infile.txt (columns: samples, Rows: positions)
   [OPTIONAL]
-    -o outfile.txt
-    -a open window for slide detection (Default: 150 (Zero in 1.5kb in 10bp bins))
-    -b close window for slide detection (Default: 170 (200 in 1.5kb in 10bp bins))
+    -o output-handle | The root for output files (output-handle-full.txt, output-handle-avg.txt, output-handle-shift.txt. Default: infile-1nucl)
+    -a INT | open window for slide detection (Default: 150 (Zero in 1.5kb in 10bp bins))
+    -b INT | close window for slide detection (Default: 170 (200 in 1.5kb in 10bp bins))
+    -s shiftvalues.txt | Use a file generated with -X to decide on the shift, do not calulate again
     -X output the value of the shift to the peak only, not the actual trace\n";
 
 my ($a,$b,$root);
@@ -30,6 +31,12 @@ if (exists $options{i}){
 }else{
   print "No infile provided!\n$usage";
   die;
+}
+
+my @shifts;
+if (exists $options{s}){
+  open(SHIFTIN, "<", $options{s}) or die "Unable to open reference shift file: $usage";
+  @shifts = <SHIFTIN>;
 }
 
 if (exists $options{o}){
@@ -68,51 +75,66 @@ my $windowsize = $b - $a;
 
 my %posavg; #averaging hash
 my $lc; #Line count
+my @h; #header
 
-my $header = <IN>;
-my @header = split(' ', $header);
-my @h = @header[0 .. ($#header - $windowsize)];
-print OUT join ("\t", @h) . "\n";
+if (!exists $options{X}){       # only print header if not doing the 'shift only'
+  my $header = <IN>;
+  my @header = split(' ', $header);
+  @h = @header[0 .. ($#header - $windowsize)];
+  print OUT join ("\t", @h) . "\n";
+}
 
 while(my $line = <IN>){
   $lc++;
   my @line = split(' ', $line);
   my $annot = shift @line;
-  my @window = @line[$a...$b];
+  my @window = @line[$a...$b];    # extract window of investigation
 
-  my $i = 0;
-  my $max =0;
-  my $maxpos = 0;
+  my $maxpos = 0;   ##The important number
 
-  foreach my $bin (@window){
-    if ($max < $bin){
-      $max = $bin;
-      $maxpos = $i;
+  # use Max position as previously outputted by -X option
+  if (exists $options{s}){
+    my $preshifts = @shifts[$lc];
+    $maxpos = (split /\t/, $preshifts)[1];
+
+    ## Finding maximum position within defined range
+  }else{
+    my $i = 0;
+    my $max = 0;
+
+    foreach my $bin (@window){
+      if ($max < $bin){
+        $max = $bin;    # If this bin is bigger than the current max, then replace
+        $maxpos = $i;   # If this bin is bigger than the current max, then assign $maxpos to this bin number
+      }
+      $i++;
     }
-    $i++;
-  }
-  #print "Max was $max at position $maxpos\n";
-  my @line_fix = @line[$maxpos .. ($#line -($windowsize - $maxpos))];
-
-  my $inc=0;
-  foreach my $p (@line_fix){
-    $posavg{$inc} += $p;
-    #print "$p";
-    $inc++;
   }
 
-  #splice @line, , $maxpos;
+  if (exists $options{X}){
+    print SHIFTOUT "$annot\t$maxpos\n";
+  }else{
+    # Cut $maxpos bins from the left side, and the remainder of the $windowsize from the right
+    my @line_fix = @line[$maxpos .. ($#line -($windowsize - $maxpos))];
 
-  print "$annot\t" . join ("\t", @line_fix) . "\n";
-  #print "$annot\t" . "NA\t" x ($windowsize - $maxpos) . join ("\t", @line) . "\tNA" x $maxpos . "\n";
+    my $inc=0;
+    foreach my $p (@line_fix){
+      $posavg{$inc} += $p;
+      #print "$p";
+      $inc++;
+    }
 
+    print OUT "$annot\t" . join ("\t", @line_fix) . "\n";
+    #print "$annot\t" . "NA\t" x ($windowsize - $maxpos) . join ("\t", @line) . "\tNA" x $maxpos . "\n";
+  }
 }
-close OUT;
 
-select AVGOUT;
-print join ("\t", @h) . "\n";
-print "$options{i}\t";
+if (!exists $options{X}){       # only print header if not doing the 'shift only'
+  select AVGOUT;
+  print join ("\t", @h) . "\n";
+  print "$options{i}\t";
 
-foreach my $val (sort keys %posavg){
-  print $posavg{$val} / $lc . "\t";
+  foreach my $val (sort keys %posavg){
+    print $posavg{$val} / $lc . "\t";
+  }
 }

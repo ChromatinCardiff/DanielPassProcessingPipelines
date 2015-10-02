@@ -5,7 +5,7 @@ library(vegan)
 
 #one gene
 g <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks-standard/profile_TSS_heatmap/genes/LD-AT3G58270.tsv", header=TRUE, check.names = FALSE)
-g <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks-RNA-guided/mean/mean_profile_TSS_heatmap/ES10_1nucl_align.txt", header=TRUE, check.names = FALSE, sep="\t")
+g <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq-80/profile_TSS_heatmap/ES12_80-noalign-avg.txt", header=TRUE, check.names = FALSE, sep="\t")
 
 g.annots <- g[1]
 g[,1] <- NULL           ### DO 4 TIMES UNTIL I WORK OUT HOW TO REPEAT!
