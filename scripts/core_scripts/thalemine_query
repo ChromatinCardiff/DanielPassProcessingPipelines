@@ -1,0 +1,47 @@
+#!/usr/bin/env python
+
+import sys
+
+# This is an automatically generated script to run your query
+# to use it you will require the intermine python client.
+# To install the client, run the following command from a terminal:
+#
+#     sudo easy_install intermine
+#
+# For further documentation you can visit:
+#     http://intermine.readthedocs.org/en/latest/web-services/
+
+# The following two lines will be needed in every python script:
+from intermine.webservice import Service
+service = Service("https://apps.araport.org:443/thalemine/service")
+
+# Read file with list of genes for searching.
+gene_list_file = sys.argv[1]
+gene_list = open(gene_list_file, "rU")
+
+# Get a new query on the class (table) you will be querying:
+for gene in gene_list:
+    gene = '"' + gene.rstrip() + '"'
+    print gene
+    query = service.new_query("Gene")
+
+# The view specifies the output columns
+    query.add_view(
+        "primaryIdentifier", "symbol", "name", "pathways.identifier",
+        "pathways.name"
+    )
+
+# Uncomment and edit the line below (the default) to select a custom sort order:
+# query.add_sort_order("Gene.primaryIdentifier", "ASC")
+
+# You can edit the constraint values below
+
+    query.add_constraint("Gene", "LOOKUP", gene , "A. thaliana", code = "A")
+
+
+# Uncomment and edit the code below to specify your own custom logic:
+# query.set_logic("A")
+
+    for row in query.rows():
+        print row["primaryIdentifier"], row["symbol"], row["name"], row["pathways.identifier"], \
+            row["pathways.name"]

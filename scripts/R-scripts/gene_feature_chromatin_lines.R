@@ -18,30 +18,43 @@ ESS <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks-RNA-guided/me
 ETS <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks-RNA-guided/median/median_profile_ETS.xls", header=TRUE, sep="\t")
 gene <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks-RNA-guided/median/median_profile_gene.xls", header=TRUE, sep="\t")
 
+#other
+TSSA <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks-RNA-guided/mean_ARA11/mean_CSS.xls", header=TRUE, sep="\t", row.names=1)
+TSST <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks-RNA-guided/mean_TAIR/mean_profile_CSS.xls", header=TRUE, sep="\t", row.names=1)
+
 # Annotations
 Exposure <- c("Light","Light","Dark","Dark","Light","Light","Dark","Dark")
 Treatment <- c("Low","High","Low","High","Low","High","Low","High")
 
 ############### TSS ###############
-# Processing
-#rownames(TSS) <-TSS$pos
-#TSS$pos <- NULL
-TSS.dec <- as.data.frame(decostand(t(TSS), 'standardize', MARGIN=1))
-TSS.dec$pos <- rownames(TSS.dec)
-TSS.dec = cbind(Exposure,Treatment,TSS.dec)
-#TSS.t <- t(TSS.dec)
-TSS.melt <- melt(TSS.dec, id=c("pos","Exposure","Treatment"))
+
+TSSA.dec <- as.data.frame(decostand(t(TSSA), 'standardize', MARGIN=1))
+Annot <- c("ARA","ARA","ARA","ARA","ARA","ARA","ARA","ARA")
+TSSA.dec$pos <- rownames(TSSA.dec)
+TSSA.dec = cbind(Exposure,Treatment,Annot,TSSA.dec)
+TSSA.melt <- melt(TSSA.dec, id=c("pos","Exposure","Treatment", "Annot"))
+
+TSST.dec <- as.data.frame(decostand(t(TSST), 'standardize', MARGIN=1))
+Annot <- c("TAIR","TAIR","TAIR","TAIR","TAIR","TAIR","TAIR","TAIR")
+TSST.dec$pos <- rownames(TSST.dec)
+TSST.dec = cbind(Exposure,Treatment,Annot,TSST.dec)
+TSST.melt <- melt(TSST.dec, id=c("pos","Exposure","Treatment", "Annot"))
+
+#combine melts
+TSSall.melt <- rbind(TSST.melt,TSSA.melt)
+ESSall.melt <- rbind(ESST.melt,ESSA.melt)
+
 
 # Chart all columns
-p <-ggplot(data=TSS.melt, aes(x=as.numeric(as.character(variable)), y=value, colour=Exposure))
+p <-ggplot(data=TSSall.melt, aes(x=as.numeric(as.character(variable)), y=value, colour=Exposure, lty=Annot))
 TSS.plot <-p +
-  stat_smooth(method="loess", span=0.01, se=TRUE) + 
+  stat_smooth(method="loess", span=0.01, se=FALSE) + 
   #geom_line(aes(x=as.numeric(as.character(variable)), y=value))+#, colour=Exposure)) +
   scale_x_continuous(breaks = pretty_breaks(n=12)) +
   #scale_colour_brewer(palette="Paired") +
   geom_vline(x=0, colour="blue", lty=2) +
   #scale_y_continuous(limits=c(-3.5, 3.5)) +
-  theme(legend.position = "right") +
+  theme(legend.position = "bottom") +
   labs(title = "TSS") +
   facet_wrap(~ Treatment, ncol=1)
 TSS.plot

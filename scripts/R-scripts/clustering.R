@@ -8,6 +8,8 @@ library(vegan)
 
 x <- read.table("/home/sbi6dap/Projects/ACS/analysis/dpos/profile_TSS_heatmap/TSS_full_u.txt", header=TRUE)
 x <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks-standard/profile_TSS_heatmap/genes/light-sigup.tsv", header=TRUE, check.names = FALSE)
+x <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq-80/profile_TSS_heatmap/ES16_80-1nuclalign-full.txt", header=TRUE)
+
 
 
 winsorize <-
@@ -25,9 +27,9 @@ winsorize <-
   }
 
 x.annots <- x[1:4]
+rownames(x) <- x[,1]
 x[,1] <- NULL           ### DO 4 TIMES UNTIL I WORK OUT HOW TO REPEAT!
 
-rownames(x) <- x[,1]
 x$name <-NULL
 x.win <- x
 x.win[, -1] <- sapply(x.win[,-1], winsorize)
@@ -46,13 +48,14 @@ x.ksub <- ddply(x.k, .(cluster), subset, sample(seq_along(cluster)<=1000))
 x.ksub2 <- na.omit(x.ksub)
 
 #summary(x.ksub)
-x.sort <- x.ksub2[order(x.ksub2[,301]),]
+x.sort <- x.ksub2[order(x.ksub2[,281]),]        #### MUST CHANGE BASED ON COLUMN NUMBER
 x.sort <- cbind(x.sort, "idsort"=1:nrow(x.sort))
 #head(x.sort, 100)
 
 x.genes <- subset(x.sort, , c(301:302))
 #rownames(x.sort) <- x.sort[,302]
-#x.x <- subset(x.sort, , -c(c(301:302)))
+x.annots <- x.k[281]
+write.table(x.annots, file = "/home/sbi6dap/Projects/ALD/MNase-seq-80/profile_TSS_heatmap/ES16_80-1nucl-clusters.txt")
 
 x.melt <- melt(x.sort, id=c("cluster","idsort"))
 summary(x.melt)
@@ -60,10 +63,10 @@ head(x.melt, 10)
 
 
 ggplot(x.melt) + 
-  geom_tile(aes(x=variable, y=id, fill=value)) + 
+  geom_tile(aes(x=variable, y=idsort, fill=value)) +
   scale_fill_gradient2(low="white", high="black") +
   geom_vline(xintercept=150) +
-  scale_x_discrete(breaks=c(0, 300, by=10))
+  scale_x_discrete(breaks=c(0, 281, by=10))
 
 ### MDS 
 

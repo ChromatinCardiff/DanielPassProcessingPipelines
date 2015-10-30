@@ -1,5 +1,5 @@
 library("edgeR")
-setwd("~/Projects/ALD/RNAseq/HTSeq")
+setwd("~/Projects/ALD/RNAseq/ARA11/HTseq")
 samples <- read.table("samples.txt", header=TRUE)
 
 counts = readDGE(samples$countf)$counts
@@ -36,4 +36,4 @@ head(nc[rn,order(samples$condition)],5)
 
 deg = rn[tt$table$FDR < .05]
 plotSmear(d, de.tags=deg)
-write.csv(tt$table, file="alltags_edgeR.csv")
+write.csv(tt$table, file="alltags_edgeR-filter<1m.csv")

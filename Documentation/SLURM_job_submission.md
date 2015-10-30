@@ -20,3 +20,8 @@ blast -in abc.fas -out out.txt -a 24
 ```
 
 <b>Useful commands:</b>
+
+```
+#Installing python modules on the server
+python -m pip install numpy --user
+```

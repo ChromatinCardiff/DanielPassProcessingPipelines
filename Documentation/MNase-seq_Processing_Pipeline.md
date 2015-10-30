@@ -57,7 +57,7 @@ danpos.py dpos ES09_150.wig,ES10_150.wig,ES11_150.wig,ES12_150.wig,ES13_150.wig,
 <b>Annotate positions by gene feature</b>
 ```
 # Make sure chromosome labels EXACTLY match the genepred file! Case sensitive, fails with div0 error.
-danpos.py profile results_individually_normalised/pooled/ES09_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES10_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES11_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES12_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES13_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES14_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES15_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES16_150.Fnor.smooth.wig --genefile_paths ../../ACS/reference_data/at_tair10_mod.genepred --flank_up 500
+danpos.py profile results_individually_normalised/pooled/ES09_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES10_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES11_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES12_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES13_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES14_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES15_150.Fnor.smooth.wig,results_individually_normalised/pooled/ES16_150.Fnor.smooth.wig --genefile_paths ../../RNAseq-annotation-results/cuffcmp-ARA11.genepred --name mean_ARA11
 ```
 <b>Annotate gtf file from cufflinks with genenames instead of generic labels and convert to genepred</b>
 ```
@@ -91,7 +91,7 @@ closest-features --closest RAW_DATA_LightHigh-RAW_DATA_DarkHigh.positions.integr
 ```
 <b>Align on first nucleosome (or other feature)</b>
 ```
-#Find max poin in peak range (default: first 200bp after TSS) and slide trace to align.
+#Find max point in peak range (default: first 200bp after TSS) and slide trace to align.
 plus1_slider.pl -i ES10_150.Fnor.smooth.wig.heatmap.xls -o ES10_150-1nucl-align
 
 #Alternatively, output the shift values to a file for reuse later (i.e. calculate +1 nucleosome alignment for 150bp data and use the shifts for small particles)

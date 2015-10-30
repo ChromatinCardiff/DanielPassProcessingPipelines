@@ -46,7 +46,7 @@ ES16.melt <-melt(ES16, id=c("name"))
 p <-ggplot()
 
 p + 
-  coord_cartesian(xlim=c(-150,0)) +
+  coord_cartesian(xlim=c(-42.5,-39.5)) +
   geom_line(data=a.melt, aes(x=as.numeric(as.character(variable)), y=(value), colour=name)) 
   geom_line(data=ES10.melt, aes(x=as.numeric(as.character(variable)), y=(value), colour="blue")) +
   geom_line(data=ES11.melt, aes(x=as.numeric(as.character(variable)), y=(value), colour="green")) 

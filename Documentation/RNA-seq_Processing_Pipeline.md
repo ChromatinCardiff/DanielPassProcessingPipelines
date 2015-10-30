@@ -15,6 +15,9 @@ Lots of information is in http://www.nature.com/nprot/journal/v7/n3/full/nprot.2
 <h4>Create reference gtf</h4>
 ```
 cuffcompare -s genome.fa -CG -R -V -r genes.gtf CL-annot/ES5_CLout-Gtest/ES5_CLout-Gtest-transcripts.gtf CL-annot/ES2_CLout-Gtest/ES2_CLout-Gtest-transcripts.gtf CL-annot/ES6_CLout-Gtest/ES6_CLout-Gtest-transcripts.gtf CL-annot/ES3_CLout-Gtest/ES3_CLout-Gtest-transcripts.gtf CL-annot/ES7_CLout-Gtest/ES7_CLout-Gtest-transcripts.gtf CL-annot/ES1_CLout-Gtest/ES1_CLout-Gtest-transcripts.gtf CL-annot/ES4_CLout-Gtest/ES4_CLout-Gtest-transcripts.gtf CL-annot/ES8_CLout-Gtest/ES8_CLout-Gtest-transcripts.gtf
+
+# Put gene_name as gene_id instead of "XLOC_1234567"
+
 ```
 
 <h3>TSS prediction (aka pulling mapped primary isoform start sites)</h3>

@@ -2,6 +2,9 @@ library(ggplot2)
 library(reshape2)
 library(scales)
 
+setwd("~/Projects/ALD/RNAseq/ARA11/HTseq")
+
+x <- read.table("samples.txt", header=TRUE)
 
 x$LL <- (x$ES09 + x$ES13) / 2
 x$DL <- (x$ES11 + x$ES15) / 2
@@ -19,13 +22,13 @@ y.high <- y.high[with(y.high, order(diff)), ]
 
 write.table(y, "d.all_summary.csv", sep=",")
 
-x <- read.csv("/home/sbi6dap/Projects/ALD/RNAseq/HTSeq/edgeR_analysis/MNase-RNAseq.csv", header=TRUE)
+x <- read.csv("/home/sbi6dap/Projects/ALD/RNAseq/TAIR10/edgeR_analysis/MNase-RNAseq.csv", header=TRUE)
 
 x$logHighdiff <- log10(abs(x$Highdiff) +1)
 x$logLowdiff <- log10(abs(x$Lowdiff) +1)
 
 
-x.melt <-melt(x, id=c("Pos"))
+x.melt <-melt(x, id=c("Gene"))
 
 p <- ggplot(data=x, aes(x=abs(logFC), y=logLowdiff))
 p + geom_point() +
