@@ -8,9 +8,7 @@ Denovo assemble unmapped reads
 ```
 /home/GROUP-smbpk/sbi6dap/localbin/megahit --kmin-1pass --k-min 27 --k-step 10 --k-max 127 -r unmapped-Ath-reseq_subset.fasta -o MH-unmapped-sub
 ```
-Annotate contigs greater than size(x)
-```
-/home/GROUP-smbpk/sbi6dap/localbin/blastn -db /home/GROUP-smbpk/sbi6dap/db/nt-nuc -query /home/GROUP-smbpk/sbi6dap/Projects/Ath-reseq/MH-unmapped-sub/final.contigs_1kb.fa -out /home/GROUP-smbpk/sbi6dap/Projects/Ath-reseq/MH-unmapped-sub/final.contigs_1kb_blast.txt -num_threads 32 -outfmt 7
+
 ```
 Extend contigs
 ```
@@ -19,4 +17,19 @@ Extend contigs
 Close Gaps between contigs
 ```
 GapCloser -b /home/GROUP-smbpk/sbi6dap/Projects/Ath-reseq/unmapped_extending/gapcloser_lib.txt -a /home/GROUP-smbpk/sbi6dap/Projects/Ath-reseq/unmapped_extending/unmapped_extending.final.scaffolds.fasta -o /home/GROUP-smbpk/sbi6dap/Projects/Ath-reseq/unmapped_extending/closed_gaps -t 32 -l 150
+```
+
+Annotate contigs greater than size(x)
+```
+~/shared_scripts/filter_short_fasta.pl 1000 <final.contigs.fa >final.contigs_1kb.fa
+
+/home/GROUP-smbpk/sbi6dap/localbin/blastn -db /home/GROUP-smbpk/sbi6dap/db/nt-nuc -query /home/GROUP-smbpk/sbi6dap/Projects/Ath-reseq/MH-unmapped-sub/final.contigs_1kb.fa -out /home/GROUP-smbpk/sbi6dap/Projects/Ath-reseq/MH-unmapped-sub/final.contigs_1kb_blast.txt -num_threads 32 -outfmt 7
+```
+
+Get taxonomic ID for matches
+```
+grep 'hits found' -A1 final.contigs_1kb_blast.txt >final.contigs_1kb_blast_top.txt
+grep -v '^#' final.contigs_1kb_blast_top.txt | cut -f1 | cut -f4 -d '|' >ACCs.txt
+
+while read ACC ; do    echo -n -e "$ACC\t";    curl -s "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=nuccore&id=${ACC}&rettype=fasta&retmode=xml" |   grep TSeq_taxid |   cut -d '>' -f 2 |   cut -d '<' -f 1 |   tr -d "\n";    echo;  done <ACCs.txt >ACC_taxids.txt &
 ```
