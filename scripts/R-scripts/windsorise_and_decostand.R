@@ -5,8 +5,8 @@ library(scales)
 library(assertthat)
 library(plyr)
 
-x <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks-RNA-guided/mean/mean_profile_TSS_heatmap/all-full-1nucl-align.txt", header=TRUE, check.names=FALSE, sep="\t")
-y <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks-RNA-guided/mean/mean_profile_TSS_heatmap/all-full-no-align.txt", header=TRUE, check.names=FALSE, sep="\t")
+x <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks-RNA-guided/mean_TAIR/mean_profile_TSS_heatmap/ES10-spline-avg.txt", header=TRUE, check.names=FALSE, sep="\t")
+y <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks-RNA-guided/mean_TAIR/mean_profile_TSS_heatmap/all-1nucl-align.txt", header=TRUE, check.names=FALSE, sep="\t")
 
 
 winsorize <-
@@ -24,10 +24,10 @@ winsorize <-
   }
 
 y.annots <- y[1:2]
-y[,1] <-NULL
+x[,1] <-NULL
 y[,1] <-NULL
 
-y.win <- y
+y.win <- x
 y.win[, -1] <- sapply(y.win[,-1], winsorize)
 y.dec <- decostand(y.win, 'range', MARGIN=1)
 
@@ -64,3 +64,20 @@ x.meanmelt <-melt(x.means, id=c("cluster"))
 
 p <-ggplot(data=x.meanmelt, aes(x=as.numeric(as.character(variable)), y=value, colour=cluster))
 p + geom_line()
+
+
+#basic plot
+#x <- x[1000:2781]
+x.melt <- melt(x)
+y.melt <- melt(y)
+yES10.melt <- subset(y.melt, grepl("ES10", name))
+p <-ggplot()
+p + 
+  geom_line(data=x.melt, aes(x=as.numeric(as.character(variable)), y=value),colour="red") +
+  geom_line(data=y.melt, aes(x=as.numeric(as.character(variable)), y=value)) 
+  stat_smooth(data=x.melt, aes(x=as.numeric(as.character(variable)), y=value), method="loess", span=0.01, se=FALSE) +
+  stat_smooth(data=yES10.melt, aes(x=as.numeric(as.character(variable)), y=value, colour=name), method="loess", span=0.01, se=FALSE) +
+  scale_x_continuous(breaks = pretty_breaks(n=12)) 
+  legend("topright")
+  
+

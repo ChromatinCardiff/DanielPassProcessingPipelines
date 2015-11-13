@@ -23,8 +23,9 @@ TSSA.dec$pos <- rownames(TSSA.dec)
 TSSA.raw <- as.data.frame(t(TSSA))
 TSSA.raw$pos <- rownames(TSSA.raw)
 TSSA.raw = as.data.frame(cbind(Exposure,Treatment,Annot,TSSA.raw))
+TSSA.rawdec = as.data.frame(decostand(TSSA.raw, 'standardize', MARGIN=1))
 TSSA.dec = cbind(Exposure,Treatment,Annot,TSSA.dec)
-TSSA.melt <- melt(TSSA.dec, id=c("pos","Exposure","Treatment", "Annot"))
+TSSA.melt <- melt(TSSA.raw, id=c("pos","Exposure","Treatment", "Annot"))
 
 TSST.dec <- as.data.frame(decostand(t(TSST), 'standardize', MARGIN=1))
 Annot <- c("TAIR","TAIR","TAIR","TAIR","TAIR","TAIR","TAIR","TAIR")
@@ -33,7 +34,7 @@ TSST.raw$pos <- rownames(TSST.raw)
 TSST.raw = as.data.frame(cbind(Exposure,Treatment,Annot,TSST.raw))
 TSST.dec$pos <- rownames(TSST.dec)
 TSST.dec = cbind(Exposure,Treatment,Annot,TSST.dec)
-TSST.melt <- melt(TSST.dec, id=c("pos","Exposure","Treatment", "Annot"))
+TSST.melt <- melt(TSST.raw, id=c("pos","Exposure","Treatment", "Annot"))
 
 CSSA.dec <- as.data.frame(decostand(t(CSSA), 'standardize', MARGIN=1))
 Annot <- c("ARA","ARA","ARA","ARA","ARA","ARA","ARA","ARA")
@@ -54,9 +55,9 @@ TSSall.melt <- rbind(TSST.melt,TSSA.melt)
 CSSall.melt <- rbind(CSST.melt,CSSA.melt)
 
 # Chart all columns
-p <-ggplot(data=TSSall.melt, aes(x=as.numeric(as.character(variable)), y=value, colour=Treatment, lty=Annot))
+p <-ggplot(data=TSSall.melt, aes(x=as.numeric(as.character(variable)), y=value, colour=Exposure, lty=Annot))
 TSS.plot <- p +
-  stat_smooth(method="loess", span=0.1, se=TRUE) + 
+  stat_smooth(method="loess", span=0.005, se=FALSE) + 
   #geom_line(aes(x=as.numeric(as.character(variable)), y=value)) + #, colour=Exposure)) +
   scale_x_continuous(breaks = pretty_breaks(n=12)) +
   #scale_colour_brewer(palette="Paired") +

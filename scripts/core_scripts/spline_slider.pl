@@ -21,12 +21,12 @@ my $usage = "## USAGE:  plus1_slider.pl -i feature_positions.txt
     -i infile.txt (columns: samples, Rows: positions)
   [OPTIONAL]
     -o output-handle | The root for output files (output-handle-full.txt, output-handle-avg.txt, output-handle-shift.txt. Default: infile-1nucl)
-    -a INT | open window for slide detection (Default: 150 (Zero in 1.5kb in 10bp bins))
-    -b INT | close window for slide detection (Default: 170 (200 in 1.5kb in 10bp bins))
+    -a INT | Open bin position for window of slide detection (Default: 150 (TSS for 1.5kb in 10bp bins))
+    -w INT | Window size for slide detection (Default: 20 (200bp in 10bp bins))
     -s shiftvalues.txt | Use a file generated with -X to decide on the shift, do not calulate again
     -X output the value of the shift to the peak only, not the actual trace\n";
 
-my ($a,$b,$root);
+my ($a,$b,$root,$windowsize);
 
 # Input file
 if (exists $options{i}){
@@ -62,23 +62,22 @@ if (exists $options{X}){
 if (exists $options{a}){
   $a = $options{a};
 }else{
-  print "Default window opening used: 150\n";
+  print "Default window opening position used: 150 bins\n";
   $a = 150;
-}
 
+}
 # For manual window changing
-if (exists $options{b}){
-  $b = $options{b};
+if (exists $options{w}){
+  $windowsize = $options{w};
 }else{
-  print "Default window closing used: 170\n";
-  $b = 170;
+  print "Default window size used: 20 bins\n";
+  $windowsize = 20;
 }
 
 #############
 # Main body #
 #############
 
-my $windowsize = $b - $a;
 #select OUT;
 
 my %posavg; #averaging hash
@@ -89,13 +88,16 @@ if (!exists $options{X}){       # only print header if not doing the 'shift only
   my $header = <IN>;
   @header = split(' ', $header);
   push(@h, shift(@header));
-  my $first = ($header[0] * 10);
-  my $last = (@header[($#header - $windowsize)] * 10);
-  for (my $i = $first ; $i <= $last; $i++) {
+
+  foreach my $x (@header){
+    $x = $x * 10;
+  }
+
+  my $last = (@header[($#header + 1 - $windowsize)]);
+  for (my $i = $header[0] ; $i <= $last; $i++) {
     push (@h, $i);
   }
   print OUT join ("\t", @h) . "\n";
-  shift @header;
 }
 
 while(my $line = <IN>){
@@ -106,19 +108,28 @@ while(my $line = <IN>){
   #print STDOUT @header;
   my @spline;
   my $spline = Math::Spline->new(\@header,\@line);
+  my $count =0;
+  my $position = ($header[0]);
+  while ($position <= (($header[-1]))){
+    #if($spline->evaluate($position) >0){
+      push @spline, $spline->evaluate($position);
+  #  }else{
+  #    push @spline, "0";
+  #  }
 
-  my $position = $header[0];
-  while ($position <= $header[-1]){
-    #print "$position  ";
-    push @spline, $spline->evaluate($position);
-    $position += 0.1;
+    #print "$position: @spline[$position]\n";
+    $count++;
+    $position++;
   }
 
-  #print join(", ", @spline). "\n";
+  #print $spline->evaluate(-1551) . "\t";
 
   my @window = splice(@spline, ($a * 10),($windowsize * 10));    # extract window of investigation x spline expansion
 
-  #print scalar @window . "\n";
+  #print scalar @line . "\t";
+  #print scalar @spline . "\t";
+  #print scalar @window . "\t";
+  #print $count . "\n";
 
   my $maxpos = 0;   ##The important number
 
@@ -145,7 +156,7 @@ while(my $line = <IN>){
     print SHIFTOUT "$annot\t$maxpos\n";
   }else{
     # Cut $maxpos bins from the left side, and the remainder of the $windowsize from the right
-    my @line_fix = splice(@spline, $maxpos, ($#spline - $#window + $maxpos));
+    my @line_fix = splice(@spline, $maxpos, ($#spline + 1 - $windowsize + $maxpos));
 
     my $inc=0;
     foreach my $p (@line_fix){
