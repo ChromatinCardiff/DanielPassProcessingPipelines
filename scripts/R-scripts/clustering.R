@@ -1,4 +1,4 @@
-install.packages("assertthat")
+#install.packages("assertthat")
 library(ggplot2)
 library(reshape2)
 library(scales)
@@ -7,8 +7,8 @@ library(plyr)
 library(vegan)
 
 x <- read.table("/home/sbi6dap/Projects/ACS/analysis/dpos/profile_TSS_heatmap/TSS_full_u.txt", header=TRUE)
-x <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks-standard/profile_TSS_heatmap/genes/light-sigup.tsv", header=TRUE, check.names = FALSE)
-x <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq-80/profile_TSS_heatmap/ES16_80-1nuclalign-full.txt", header=TRUE)
+x <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq-80/RAWDATA/mean_ARA11_TSS.xls", header=TRUE, check.names = FALSE)
+x <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq-80/RAWDATA/mean_ARA11_TSS_heatmap/ES10_80.Fnor.smooth.wig.heatmap.xls-1nucl_align-full.txt", header=TRUE)
 
 
 
@@ -52,7 +52,7 @@ x.sort <- x.ksub2[order(x.ksub2[,281]),]        #### MUST CHANGE BASED ON COLUMN
 x.sort <- cbind(x.sort, "idsort"=1:nrow(x.sort))
 #head(x.sort, 100)
 
-x.genes <- subset(x.sort, , c(301:302))
+x.genes <- subset(x.sort, , c(281:282))        ######### Loot at column number
 #rownames(x.sort) <- x.sort[,302]
 x.annots <- x.k[281]
 write.table(x.annots, file = "/home/sbi6dap/Projects/ALD/MNase-seq-80/profile_TSS_heatmap/ES16_80-1nucl-clusters.txt")

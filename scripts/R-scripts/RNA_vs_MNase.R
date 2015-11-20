@@ -36,7 +36,6 @@ p + geom_point() +
 
   stat_smooth(se=FALSE) 
 
-
   coord_cartesian(ylim=c(0,50))
   scale_x_continuous(breaks = pretty_breaks(n=12)) +
   geom_vline(x=0, colour="black", lty=2) +

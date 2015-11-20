@@ -22,6 +22,9 @@ gene <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks-RNA-guided/m
 TSSA <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks-RNA-guided/mean_ARA11/mean_CSS.xls", header=TRUE, sep="\t", row.names=1)
 TSST <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks-RNA-guided/mean_TAIR/mean_profile_CSS.xls", header=TRUE, sep="\t", row.names=1)
 
+#tmp
+tmp <- read.table("/home/sbi6dap/Projects/ALD/totalcoverage/mean_gene.xls", header=TRUE, sep="\t", row.names=1)
+
 # Annotations
 Exposure <- c("Light","Light","Dark","Dark","Light","Light","Dark","Dark")
 Treatment <- c("Low","High","Low","High","Low","High","Low","High")
@@ -44,9 +47,8 @@ TSST.melt <- melt(TSST.dec, id=c("pos","Exposure","Treatment", "Annot"))
 TSSall.melt <- rbind(TSST.melt,TSSA.melt)
 ESSall.melt <- rbind(ESST.melt,ESSA.melt)
 
-
 # Chart all columns
-p <-ggplot(data=TSSall.melt, aes(x=as.numeric(as.character(variable)), y=value, colour=Exposure, lty=Annot))
+p <-ggplot(data=TSSA.melt, aes(x=as.numeric(as.character(variable)), y=value, colour=Exposure, lty=Annot))
 TSS.plot <-p +
   stat_smooth(method="loess", span=0.01, se=FALSE) + 
   #geom_line(aes(x=as.numeric(as.character(variable)), y=value))+#, colour=Exposure)) +
@@ -167,3 +169,21 @@ gene.plot <-p +
   labs(title = "gene")
 
 multiplot(TSS.plot,TTS.plot,CSS.plot,CTS.plot,ESS.plot,ETS.plot, cols=3)
+
+########### One Off charts ###########
+tmp.dec <- as.data.frame(decostand(t(tmp), 'standardize', MARGIN=1, na.rm =TRUE))
+tmp.dec$pos <- rownames(tmp.dec)
+tmp.dec = cbind(Exposure,Treatment,tmp.dec)
+tmp.melt <- melt(tmp.dec, id=c("pos", "Exposure","Treatment"))
+#######################################
+
+p <-ggplot(data=tmp.melt, aes(x=as.numeric(as.character(variable)), y=value, colour=Exposure, lty=Treatment))
+p +
+  stat_smooth(method="loess", span=0.01, se=FALSE) + 
+  #geom_line(aes(x=as.numeric(as.character(variable)), y=value)) +
+  scale_x_continuous(breaks = pretty_breaks(n=12)) +
+  #scale_colour_brewer(palette="Paired") +
+  geom_vline(x=0, colour="blue", lty=2) +
+  #scale_y_continuous(limits=c(-3.5, 3.5)) +
+  theme(legend.position = "bottom") +
+  labs(title = "gene")
