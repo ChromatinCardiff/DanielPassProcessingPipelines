@@ -2,6 +2,14 @@
 use strict;
 use warnings;
 
+##################################################
+## Daniel Pass | github.com/passdan | August 2015 ##
+##################################################
+
+###############
+# Get options #
+###############
+
 use Getopt::Std;
 my %options=();
 getopts('i:o:m:x:b:', \%options);
@@ -35,6 +43,10 @@ while(<MASK>){
   my @line = split('\t', $_);
   $maskhash{$line[0]} = $line[1];
 }
+
+#############
+# Main body #
+#############
 
 my $head = <IN>;
 #print $head;

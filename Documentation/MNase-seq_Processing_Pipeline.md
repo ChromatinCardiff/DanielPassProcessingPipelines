@@ -110,7 +110,10 @@ cut -f1,4,5 ES09_totalcov.txt > ES09_totalcov_cut.txt
 data_binner.pl -i ES09_totalcov_cut.txt -o ES09_totalcov.sgr -b 10 -m AVG
 ```
 
-#Remove splice variant number from rownames
+
 ```
+#Remove splice variant number from rownames
 for i in *xls; do sed 's/^\(AT.......\)../\1/' $i >$i.cut; done
+#Remove splice variant number from rownames AND duplicate row names
+for i in *xls; do sed 's/^\(AT.......\)../\1/' $i | awk '!seen[$1]++' >$i.cut; done
 ```

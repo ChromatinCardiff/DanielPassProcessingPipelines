@@ -1,12 +1,32 @@
+#!/usr/bin/env Rscript
+library("optparse")
+
+option_list = list(
+  make_option(c("-f", "--file"), type="character", default=NULL, help="dataset file name", metavar="character"),
+	make_option(c("-o", "--out"), type="character", default="out.txt", help="output file name [default= %default]", metavar="character"),
+  #make_option(c("-a", "--left"), type="number", default="130", help="Open window", metavar="number"),
+  #make_option(c("-b", "--right"), type="number", default="170", help="Close window", metavar="number"),
+  #make_option(c("-c", "--split"), type="number", default="150", help="Split point", metavar="number")
+);
+
+opt_parser = OptionParser(option_list=option_list);
+opt = parse_args(opt_parser);
+
+if (is.null(opt$file)){
+  print_help(opt_parser)
+  stop("At least one argument must be supplied (input file).n", call.=FALSE)
+}
+
 library(ggplot2)
 library(reshape2)
 library(scales)
 library(vegan)
 
 
-setwd("~/Projects/ALD/totalcoverage/mean_CSS_heatmap")
+#setwd("~/Projects/ALD/totalcoverage/mean_CSS_heatmap")
+ES09 <- read.table(opt$file, header=TRUE, sep="\t", row.names=1, check.names = FALSE)
 
-ES09 <- read.table("ES09_totalcov.xls.cut", header=TRUE, sep="\t", row.names=1, check.names = FALSE)
+#ES09 <- read.table("ES09_totalcov.xls.cut", header=TRUE, sep="\t", row.names=1, check.names = FALSE)
 ES10 <- read.table("ES10_totalcov.xls.cut", header=TRUE, sep="\t", row.names=1)
 ES11 <- read.table("ES11_totalcov.xls.cut", header=TRUE, sep="\t", row.names=1)
 ES12 <- read.table("ES12_totalcov.xls.cut", header=TRUE, sep="\t", row.names=1)
@@ -34,7 +54,7 @@ CalculateRatio <- function(Sample,Left,Right,Split)
 {
   MeanLeft <- rowMeans(Sample[Left:Split])
   MeanRight <- rowMeans(Sample[Split:Right])
-  
+
   ratio <- MeanLeft/MeanRight
   ratio
 }
@@ -58,7 +78,8 @@ resratios <- Reduce(function(a,b){
   ans[,!names(ans) %in% "Row.names"]
 }, list(HTseq, Lowratio.df))                             # all.count,
 
-#write.table(res, "/home/sbi6dap/Projects/ALD/totalcoverage/LDgenes_totalcov_vs_exp.txt", sep="\t")
+
+#write.table(downreg.list, "/home/sbi6dap/Projects/ALD/totalcoverage/downreg_full.txt", sep="\t")
 
 resratios$gene <-row.names(resratios)
 
@@ -86,50 +107,99 @@ p +
   stat_smooth(aes(group=variable), method = loess, se=TRUE)
 
   geom_point(aes(x=Light, y=logFC), colour="red") +
-  geom_point(aes(x=Dark, y=logFC), colour="blue") 
+  geom_point(aes(x=Dark, y=logFC), colour="blue")
   geom_point(aes(x=ES11, y=logFC), colour="red") +
   geom_point(aes(x=ES12, y=logFC), colour="blue") +
   geom_point(aes(x=ES13, y=logFC), colour="red") +
   geom_point(aes(x=ES14, y=logFC), colour="blue") +
   geom_point(aes(x=ES15, y=logFC), colour="red") +
   geom_point(aes(x=ES16, y=logFC), colour="blue") +
-  
-  #scale_x_continuous(breaks = pretty_breaks(n=12)) 
-  
-  #geom_vline(x=0, colour="blue", lty=2) +
-  
-  #theme(legend.position = "bottom") +
-  
-  
-  ## Normal chart
-  upreg.list <- resratios[resratios$diff > 0.05,]
-  uplist <-upreg.list$gene
-  downreg.list <- resratios[resratios$diff < -0.05,]
+
+
+## Normal chart
+upreg.list <- resratios[resratios$diff > 0.5,]
+uplist <-upreg.list$gene
+downreg.list <- resratios[resratios$diff < -0.5,]
 downlist <-downreg.list$gene
 
 ES09$gene <- row.names(ES09)
-  posuptest <- ES09[match(upreg.list$gene, ES09$gene), ]
+posuptest <- ES09[match(upreg.list$gene, ES09$gene), ]
   #posup <- data.frame(merge(ES09, uplist, by = "row.names", incomparables = NA, check.names = FALSE))
   #posdown <- merge(ES09, downreg.list, by = "row.names", incomparables = NA)
-  posuptest$gene <- NULL
-  upchromatin.dec <- data.frame(decostand(posuptest, 'standardize', MARGIN=2))
+posuptest$gene <- NULL
+upchromatin.dec <- data.frame(decostand(posuptest, 'standardize', MARGIN=2))
 upchromatin.means <- data.frame(mean=colMeans(upchromatin.dec))
 upchromatin.means$pos <- row.names(upreg.list$gene)
 up.melt <- melt(upchromatin.means, id=c("pos"))
-  #up.means <- dcast(up.melt, genes ~ variable , mean)
 
 
-p <-ggplot(data=upchromatin.means, aes(x=as.numeric(as.character(row.names)), y=mean))
+############## BOXPLOTS ####################
+allreg.melt <- melt(allreg.list, id=c("logFC","logCPM","PValue","FDR","gene","direction","diff"))
+summary(allreg.list)
+p <-ggplot(data=allreg.melt)
+ylim1 = c(boxplot.stats(log(allreg.melt$logFC))$stats[3] - abs((boxplot.stats(log(allreg.melt$logFC))$stats[1]*1.1)),boxplot.stats(log(allreg.melt$value))$stats[3] + (boxplot.stats(log(allreg.melt$logFC))$stats[5]*1.1))
 p +
-  #stat_smooth(method="loess", span=0.01, se=FALSE) + 
-  geom_line() #+#, colour=Exposure)) +
-  scale_x_continuous(breaks = pretty_breaks(n=12)) +
+  labs(title = "DE for genes with >0.05 5'UTR to Exon1 ratio difference", x="5'UTR to Exon occupancy change", y="Ratio ") +
+  geom_boxplot(aes(x=as.factor(direction), y=logCPM, fill=variable), outlier.shape = NA)
+  #geom_boxplot(aes(x=as.factor(direction), y=log(Dark))) +
+  coord_cartesian(ylim = ylim1)
+  coord_cartesian(ylim = c(-0.5,0.5))
   #scale_colour_brewer(palette="Paired") +
-  geom_vline(x=0, colour="blue", lty=2) 
-  #scale_y_continuous(limits=c(-3.5, 3.5)) +
-  theme(legend.position = "bottom") 
+  geom_vline(x=0, colour="blue", lty=2)
+
+  theme(legend.position = "bottom")
   labs(title = "TSS") +
   facet_wrap(~ Treatment, ncol=1)
 
 plot(data=resFilter, log(ES09) ~ log(ES3))
 plot(data=resFilterInv, log(ES09) ~ log(ES3))
+
+ES09up <- read.table("ES09_tc_up.xls", header=TRUE, sep="\t", row.names=1, check.names = FALSE)
+ES09down <- read.table("ES09_tc_down.xls", header=TRUE, sep="\t", row.names=1, check.names = FALSE)
+
+library(assertthat)
+
+winsorize <-
+  function(x, q=0.01)
+  {
+    assert_that(is.numeric(x))
+    assert_that(is.number(q), q>=0, q<=1)
+
+    lohi <- quantile(x, c(q, 1-q), na.rm=TRUE)
+    if(diff(lohi) < 0) lohi <- rev(lohi)
+
+    #x[!is.na(x) & x < lohi[1]] <- lohi[1]
+    x[!is.na(x) & x > lohi[2]] <- lohi[2]
+    x
+  }
+
+ES09up.win <- ES09up
+ES09up.win[, -1] <- sapply(ES09up.win[,-1], winsorize)
+ES09down.win <- ES09down
+ES09down.win[, -1] <- sapply(ES09down.win[,-1], winsorize)
+
+ES09up.dec <- data.frame(decostand(ES09up.win, 'standardize', MARGIN=1))
+ES09down.dec <- data.frame(decostand(ES09down.win, 'standardize', MARGIN=1))
+
+ES09up.means <- data.frame(meanup=colMeans(ES09up.dec))#, pos=as.numeric(as.character(colnames(ES09up.win))))
+ES09down.means <- data.frame(meandown=colMeans(ES09down.dec))#, pos=as.numeric(as.character(colnames(ES09down.win))))
+
+ES09.full <- cbind(ES09up.means,ES09down.means, pos=as.numeric(as.character(colnames(ES09down.win))))
+
+ES09.melt <- melt(ES09.full, id=c("pos"))
+
+p <-ggplot(data=averageES09, aes(x=xcol, y=vals))
+p +
+  #stat_smooth(method="loess", span=0.01, se=FALSE) +
+  geom_line(aes(colour=variable)) #+#, colour=Exposure)) +
+  scale_x_continuous(breaks = pretty_breaks(n=12)) +
+  #scale_colour_brewer(palette="Paired") +
+  geom_vline(x=0, colour="blue", lty=2)
+  #scale_y_continuous(limits=c(-3.5, 3.5)) +
+  theme(legend.position = "bottom")
+  labs(title = "TSS") +
+  facet_wrap(~ Treatment, ncol=1)
+
+
+averageES09$xcol <- row.names(averageES09)
+p+geom_point()
