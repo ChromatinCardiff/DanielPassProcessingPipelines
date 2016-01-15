@@ -1,39 +1,40 @@
 #!/usr/bin/env Rscript
-library("optparse")
 
-option_list = list(
-  make_option(c("-f", "--file"), type="character", default=NULL, help="dataset file name", metavar="character"),
-	make_option(c("-o", "--out"), type="character", default="out.txt", help="output file name [default= %default]", metavar="character"),
-  #make_option(c("-a", "--left"), type="number", default="130", help="Open window", metavar="number"),
-  #make_option(c("-b", "--right"), type="number", default="170", help="Close window", metavar="number"),
-  #make_option(c("-c", "--split"), type="number", default="150", help="Split point", metavar="number")
-);
+#######################
+### Parse Arguments ###
+#######################
 
-opt_parser = OptionParser(option_list=option_list);
-opt = parse_args(opt_parser);
+library("argparser")
 
-if (is.null(opt$file)){
-  print_help(opt_parser)
-  stop("At least one argument must be supplied (input file).n", call.=FALSE)
-}
+p <- arg_parser("Input parameters")
+
+p <- add_argument(p, "-d", type="character", default=NULL, help="working directory")
+p <- add_argument(p, "-o", type="character", default="out.txt", help="output file name")
+p <- add_argument(p, "-a", type="number", default="130", help="Open window")
+p <- add_argument(p, "-b", type="number", default="170", help="Close window")
+p <- add_argument(p, "-c", type="number", default="150", help="Split point")
+
+argv <- parse_args(p)
+
+####################
+### Start Script ###
+####################
 
 library(ggplot2)
 library(reshape2)
 library(scales)
 library(vegan)
 
+setwd(argv$d)
 
-#setwd("~/Projects/ALD/totalcoverage/mean_CSS_heatmap")
-ES09 <- read.table(opt$file, header=TRUE, sep="\t", row.names=1, check.names = FALSE)
-
-#ES09 <- read.table("ES09_totalcov.xls.cut", header=TRUE, sep="\t", row.names=1, check.names = FALSE)
-ES10 <- read.table("ES10_totalcov.xls.cut", header=TRUE, sep="\t", row.names=1)
-ES11 <- read.table("ES11_totalcov.xls.cut", header=TRUE, sep="\t", row.names=1)
-ES12 <- read.table("ES12_totalcov.xls.cut", header=TRUE, sep="\t", row.names=1)
-ES13 <- read.table("ES13_totalcov.xls.cut", header=TRUE, sep="\t", row.names=1)
-ES14 <- read.table("ES14_totalcov.xls.cut", header=TRUE, sep="\t", row.names=1)
-ES15 <- read.table("ES15_totalcov.xls.cut", header=TRUE, sep="\t", row.names=1)
-ES16 <- read.table("ES16_totalcov.xls.cut", header=TRUE, sep="\t", row.names=1)
+ES09 <- read.table("ES09_totalcov.xls.cut", header=TRUE, sep="\t", row.names=1, check.names = FALSE)
+ES10 <- read.table("ES10_totalcov.xls.cut", header=TRUE, sep="\t", row.names=1, check.names = FALSE)
+ES11 <- read.table("ES11_totalcov.xls.cut", header=TRUE, sep="\t", row.names=1, check.names = FALSE)
+ES12 <- read.table("ES12_totalcov.xls.cut", header=TRUE, sep="\t", row.names=1, check.names = FALSE)
+ES13 <- read.table("ES13_totalcov.xls.cut", header=TRUE, sep="\t", row.names=1, check.names = FALSE)
+ES14 <- read.table("ES14_totalcov.xls.cut", header=TRUE, sep="\t", row.names=1, check.names = FALSE)
+ES15 <- read.table("ES15_totalcov.xls.cut", header=TRUE, sep="\t", row.names=1, check.names = FALSE)
+ES16 <- read.table("ES16_totalcov.xls.cut", header=TRUE, sep="\t", row.names=1, check.names = FALSE)
 
 # Annotations
 samplesHigh <- list(ES10,ES12,ES14,ES16)

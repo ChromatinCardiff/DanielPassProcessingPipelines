@@ -2,20 +2,27 @@ library(vegan)
 library(ggplot2)
 library(ellipse)
 library(grid)
+library(reshape)
 
 
 # Load data file
 x <-read.csv("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks/TSS_for_NMDS_500_upstream.txt", sep="\t", header=TRUE)
+x <-read.csv("/home/sbi6dap/Projects/ALD/totalcoverage/mean_CSS.xls", sep="\t", header=TRUE, row.names=1)
 x <-read.csv("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks/TSS_for_NMDS_0-1000.txt", sep="\t", header=TRUE)
-x.env <-read.csv("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks/sample_map.txt", sep="\t", header=TRUE)
+x <-read.table("/media/sbi6dap/HDD_home/Dropbox/Work/Projects/Athal-projects/AKO/tapestation.csv", sep="\t", header=TRUE)
+x.env <-read.csv("/home/sbi6dap/Projects/ALD/MNase-seq/sample_map.txt", sep="\t", header=TRUE)
 
 #Transpose so its one rows:sample, column:OTU
-rownames(x) <- x$pos
-x = x[-1]
-x_matrix <- t(x)
+#rownames(x) <- x$pos
+#x = x[-1]
+x.dec <- data.frame(decostand(x, 'range', MARGIN=2))
+x_matrix <- t(x.dec)
+
 
 #Calculate distance
-x.dis <- vegdist(x_matrix)
+x.dis <- vegdist(as.matrix(x_matrix[150:200]))
+xcast <- cast(x, Nucleosome ~ Sample, value= 'Normalisedconc')
+x.dis <- vegdist(as.matrix(t(xcast)), na.rm=TRUE)
 
 #View stresses
 x.mds0 <-monoMDS(x.dis)
@@ -24,16 +31,23 @@ stressplot(x.mds0, x.dis)
 #Make MDS
 x.mds <- metaMDS(x_matrix, trace = FALSE)
 
-plot(x.mds, type = "n")		##t = labeled, p = points
-text(x.mds,display="sites",col="red",cex=1)
-text(x.mds,display="species",col="black",cex=0.6)
-fac1<-x.env$Treatment			## choose factor for grouping
+# Basic other
+x.mds <- metaMDS(as.matrix(t(xcast)), na.rm=TRUE, trace = FALSE)
+plot(x.mds, type = "t")
+
+fac1<-x.env$Treatment  		## choose factor for grouping
 fac2<-x.env$Exposure
 fac3<-x.env$Pairs
+
+plot(x.mds, type = "n", xlim=c(-0.35,0.4), ylim=c(-0.15,0.15))		##t = labeled, p = points, n=none
+ordispider(x.mds,group=fac3, label=FALSE, lwd=5, lty=3, col="blue")
+ordiellipse(x.mds,group=fac1, label=TRUE, lwd=5)
+points(x.mds, cex=3, pch=21, bg=fac2)
+legend("topleft", c("Light", "Dark","Reps"), pch=21, pt.bg=fac2, cex=1.75, pt.cex=4.5)
+text(x.mds,display="sites",col="red",cex=1, adj = c(0,2))
+#text(x.mds,display="species",col="black",cex=0.6)
 ordispider(x.mds,group=fac1, label=TRUE, lwd=4, lty=3)
 ordispider(x.mds,group=fac2, label=TRUE, lwd=4, lty=5)
-ordispider(x.mds,group=fac3, label=FALSE, lwd=5, lty=1, col="blue")
-ordiellipse(x.mds,group=fac1, label=TRUE, lwd=5)
 ordiellipse(x.mds,group=fac2, label=TRUE, lwd=5)
 
 #Extract NMDS coordinates
