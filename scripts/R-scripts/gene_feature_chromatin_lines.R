@@ -23,7 +23,7 @@ TSSA <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks-RNA-guided/m
 TSST <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks-RNA-guided/mean_TAIR/mean_profile_CSS.xls", header=TRUE, sep="\t", row.names=1)
 
 #tmp
-tmp <- read.table("/home/sbi6dap/Projects/ALD/totalcoverage/mean_gene.xls", header=TRUE, sep="\t", row.names=1)
+tmp <- read.table("/home/sbi6dap/Projects/ALD/totalcoverage/mean_TSS_with_AtN.xls", header=TRUE, sep="\t", row.names=1)
 
 # Annotations
 Exposure <- c("Light","Light","Dark","Dark","Light","Light","Dark","Dark")
@@ -171,19 +171,23 @@ gene.plot <-p +
 multiplot(TSS.plot,TTS.plot,CSS.plot,CTS.plot,ESS.plot,ETS.plot, cols=3)
 
 ########### One Off charts ###########
-tmp.dec <- as.data.frame(decostand(t(tmp), 'standardize', MARGIN=1, na.rm =TRUE))
+tmp.dec <- as.data.frame(decostand(tmp, 'standardize', MARGIN=2, na.rm =TRUE))
 tmp.dec$pos <- rownames(tmp.dec)
-tmp.dec = cbind(Exposure,Treatment,tmp.dec)
+#tmp.dec = cbind(Exposure,Treatment,tmp.dec)
+tmp.melt <- melt(tmp.dec, id=c("pos"))
 tmp.melt <- melt(tmp.dec, id=c("pos", "Exposure","Treatment"))
-#######################################
 
-p <-ggplot(data=tmp.melt, aes(x=as.numeric(as.character(variable)), y=value, colour=Exposure, lty=Treatment))
+tmp$pos <- rownames(tmp)
+tmp.melt <- melt(tmp, id=c("pos"))
+#######################################
+p <-ggplot(data=tmp.melt, aes(x=as.numeric(as.character(pos)), y=value, colour=variable)) # BASIC
+#p <-ggplot(data=tmp.melt, aes(x=as.numeric(as.character(variable)), y=value, colour=Exposure, lty=Treatment))
 p +
-  stat_smooth(method="loess", span=0.01, se=FALSE) + 
+  stat_smooth(method="loess", span=0.01, se=FALSE) +
   #geom_line(aes(x=as.numeric(as.character(variable)), y=value)) +
   scale_x_continuous(breaks = pretty_breaks(n=12)) +
-  #scale_colour_brewer(palette="Paired") +
-  geom_vline(x=0, colour="blue", lty=2) +
+  scale_colour_brewer(palette="Paired") +
+  #geom_vline(0, colour="blue", lty=2) +
   #scale_y_continuous(limits=c(-3.5, 3.5)) +
   theme(legend.position = "bottom") +
-  labs(title = "gene")
+  labs(title = "TSS")

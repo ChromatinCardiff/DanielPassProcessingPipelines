@@ -5,6 +5,11 @@
 ```
 cat <(samtools view -H ES12.bam) <(samtools view -q 255 ES12.bam | shuf -n 10000000) > ES12_10m.sam &
 samtools view -bS ES12_10m.sam > ES12_10m.bam
+samtools merge output.bam input1.bam input2.bam input*.bam
+```
+<b>Make insert size histogram</b>
+```
+cut -f9 AtN_rep.sam | grep -v '-' | sort | uniq -c >AtN_insertsize_hist.txt
 ```
 <b>find closest gene feature</b>
 ```

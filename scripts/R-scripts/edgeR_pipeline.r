@@ -1,5 +1,6 @@
 library("edgeR")
 setwd("~/Projects/ALD/RNAseq/ARA11/HTseq")
+setwd("~/Projects/HJR/")
 samples <- read.table("samples.txt", header=TRUE)
 
 counts = readDGE(samples$countf)$counts
@@ -26,7 +27,7 @@ d = estimateTagwiseDisp(d)
 plotMeanVar(d, show.tagwise.vars=TRUE, NBline=TRUE)
 plotBCV(d)
 
-de = exactTest(d, pair=c("16h-Light", "16h-Dark"))        ## AKA Fischers exact test
+de = exactTest(d, pair=c("stagep12", "stagep15"))        ## AKA Fischers exact test
 
 tt = topTags(de, n=nrow(d))
 head(tt$table)
