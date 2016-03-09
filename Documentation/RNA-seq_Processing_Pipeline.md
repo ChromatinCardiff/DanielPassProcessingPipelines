@@ -35,40 +35,82 @@ htseq-count -f 'bam' -s no -a 10 /home/GROUP-smbpk/sbi6dap/working/RNA-seq/worki
 ```
 EdgeR
 ```
-library("edgeR")
-setwd("~/Projects/ALD/RNAseq/HTSeq")
-samples <- read.table("samples.txt", header=TRUE)
+#source("http://bioconductor.org/biocLite.R")
+#biocLite("edgeR")
+library(edgeR)
+setwd("~/Projects/NON-ATHAL/BMR/HTSeq/")
+# Pre-calculate length with gtf2lengthGC.r
+LengthGC <- read.table("../REFS/GC_lengths.tsv", header=TRUE)
 
-counts = readDGE(samples$countf)$counts
+samples <- read.table("tmp_samples.txt", header=TRUE)
 
+counts = data.frame(readDGE(samples$countfile)$counts)
 noint = rownames(counts) %in% c("no_feature","ambiguous","too_low_aQual","not_aligned","alignment_not_unique")
 cpms = cpm(counts)
-keep = rowSums(cpms >1) >=4 & !noint
-counts = counts[keep,]
+rpkm <- rpkm(counts, LengthGC$Length)
+rpkm.colsums <- colSums(rpkm)
+TPM <- sweep(rpkm, 2, rpkm.colsums, `/`)
+TPM <- apply(TPM, 2, function(x) (x * 10^6 ))
 
-colnames(counts) = samples$shortname
-head(counts[,order(samples$condition)], 5)
+# Filter out <1 counts per million                                  ############################
+keep = rowSums(TPM >10) >=2 & !noint  # 2 for smallest rep group    #### Hash to not filter ####
+exp.matrix = TPM[keep,]                                             ############################
+#ALTERNATIVE#
+keep = rowSums(rpkm >1) >=2 & !noint  # 2 for smallest rep group
+exp.matrix = rpkm[keep,]
+#ALTERNATIVE#
+keep = rowSums(cpms >1) >=2 & !noint  # 2 for smallest rep group
+exp.matrix = counts[keep,]
+# OR dont filter anything
+nrow(exp.matrix)
 
-d = DGEList(counts=counts, group=samples$condition)
+colnames(exp.matrix) = samples$origID
+head(exp.matrix[,order(samples$condition)], 5)
+
+d = DGEList(counts=exp.matrix, group=samples$condition2)        # Test by condition
 d = calcNormFactors(d)
-plotMDS(d, labels=samples$shortname, col=c("darkgreen","blue", "darkred")[factor(samples$condition)])
-legend("topleft", c("Dark (16h)", "Light (16h)", "Light (5d)"), fill=c("darkgreen","blue","darkred"))
+
+par(mar=c(5.1, 4.1, 4.1, 9.1), xpd=TRUE)
+plotMDS(d, labels=samples$shortname, col=c("yellow", "red", "blue", "green", "darkgreen")[factor(samples$condition)])
+legend("right", inset=c(-0.25,0), c("Ctrl-untreated", "Ctrl-Scrambled", "miR5p", "221", "222"), fill=c("darkgreen", "green", "yellow", "red", "blue"))
+title(main="MDS plot of sample relationships (paired)")
+par(xpd=FALSE)
 
 d = estimateCommonDisp(d)
 d = estimateTagwiseDisp(d)
 
 plotMeanVar(d, show.tagwise.vars=TRUE, NBline=TRUE)
+title(main="Per-gene Mean-Variance relationship")
 plotBCV(d)
+title(main="biological coefficient of variation versus TPM")
 
-de = exactTest(d, pair=c("16h-Light", "16h-Dark"))
+# Test by repeat number (for QC because of group 3 batching)
+e = DGEList(counts=counts, group=samples$"repeat")
+e = calcNormFactors(e)
+e = estimateCommonDisp(e)
+e = estimateTagwiseDisp(e)
 
-tt = topTags(de, n=nrow(d))
-head(tt$table)
+###############
+# Comparisons #
+###############
+gene.names <- read.table("geneIDs-name-type.txt", header=TRUE)
+
+de1 = exactTest(d, pair=c("Untreated", "Neg-ctrl"))        ## AKA Fischers exact test
+de2 = exactTest(d, pair=c("Neg-ctrl", "miR5p"))        ## AKA Fischers exact test
+
+setwd("~/temp/analysis/")
+pdf( "smearplots.pdf" , width = 10 , height = 7 )
+
+tt = topTags(de1a, n=nrow(d))
 nc = cpm(d, normalized.lib.sizes=TRUE)
 rn = rownames(tt$table)
-head(nc[rn,order(samples$condition)],5)
-
 deg = rn[tt$table$FDR < .05]
 plotSmear(d, de.tags=deg)
-write.csv(tt$table, file="toptags_edgeR.csv")
+title(main="untreated_vs_neg")
+tt$table$ID <- row.names(tt$table)
+tmp.merge <- merge(tt$table, gene.names, by="ID", all.x = TRUE)
+de1.sort <- tmp.merge[with(tmp.merge, order(FDR)),]
+head(de1.sort)
+write.csv(de1.sort, file="toptags_edgeR-untreated_vs_neg.csv", row.names = FALSE)
+dev.off()
 ```
