@@ -13,6 +13,9 @@ library(vegan)
 x <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks-RNA-guided/mean/mean_profile_TSS_heatmap/ES10_1nucl_align.txt", header=TRUE, sep="\t")
 summary(x)
 
+tmp <- read.table("/home/sbi6dap/Projects/ALD/totalcoverage/mean_ESS_heatmap/LDcommonmodel-ARA11.genepred.ess.ES09_totalcov.Fnor.wig.heatmap_1st-exon.xls.cut", header=TRUE, sep="\t", row.names=1)
+
+
 # Processing
 rownames(x) <-x$pos
 x.dec <- decostand(x, 'standardize', MARGIN=2)
@@ -35,12 +38,13 @@ multiplot(p1,p2, cols=1)
 ####################################################################################################################
 ####################################################################################################################
 
+x1 <- tmp
 
 x1 <- read.table("~/Projects/ACS/analysis/dpos/profile_TSS_heatmap/TSS_full_uniq.txt", header=TRUE)
 rownames(x1) <-x1$name
 x1[,1] <- NULL
 x2<-colMeans(x1, na.rm=TRUE)
-x2$pos <-as.numeric(colnames(y1))
+x2$pos <-as.numeric(colnames(x1))
 x.melt <-melt(x2)
 x.melt2 <-na.omit(x.melt)
 
@@ -144,9 +148,9 @@ p +
 #### MISC
 y.melt <- melt(y2)
 y.melt
-p <- ggplot(data=y.melt, aes(x=Var1, y=value))
+p <- ggplot(data=x.melt, aes(x=as.numeric(as.character(L1)), y=value))
 p + 
-  geom_line() +
+  geom_line() 
   scale_x_continuous(breaks = pretty_breaks(n=12)) +
   geom_vline(x=0, colour="blue") +
   labs(title = "'Marg'", x = "Position from TSS")

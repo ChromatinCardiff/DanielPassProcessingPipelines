@@ -23,7 +23,7 @@ TSSA <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks-RNA-guided/m
 TSST <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks-RNA-guided/mean_TAIR/mean_profile_CSS.xls", header=TRUE, sep="\t", row.names=1)
 
 #tmp
-tmp <- read.table("/home/sbi6dap/Projects/ALD/totalcoverage/mean_TSS_with_AtN.xls", header=TRUE, sep="\t", row.names=1)
+tmp <- read.table("/home/sbi6dap/Projects/ALD/totalcoverage/mean_ESS_heatmap/LDcommonmodel-ARA11.genepred.ess.ES09_totalcov.Fnor.wig.heatmap_1st-exon.xls.cut", header=TRUE, sep="\t", row.names=1)
 
 # Annotations
 Exposure <- c("Light","Light","Dark","Dark","Light","Light","Dark","Dark")

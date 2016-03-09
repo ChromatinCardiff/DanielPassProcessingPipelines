@@ -51,7 +51,7 @@ my $def_outdir = $1;
 
 # Assign default values
 if(exists $options{o}){
-	$outdir = $options{w};
+	$outdir = $options{o};
 }else{
 	$outdir = "$def_outdir" . "particles";
 }

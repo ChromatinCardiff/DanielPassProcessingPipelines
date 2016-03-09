@@ -1,0 +1,9 @@
+
+# Extract fasta sequence from a genome (bed format: chr \t start \t end)
+bedtools getfasta -fi Bos_taurus.UMD3.1.dna.toplevel.fa -bed tmp.bed -fo mir23a_27a_24-2_604up1757down.fasta
+
+# Extract alignments that overlap with bed region
+intersectBed -abam BMR01out/accepted_hits.bam -b ../REFS/tmp.bed >ENSBTAG00000029996.bam
+
+# Coverage Histograms (Ref: http://www.gettinggeneticsdone.com/2014/03/visualize-coverage-exome-targeted-ngs-bedtools.html)
+bedtools coverage -hist -abam samp.01.bam -b target_regions.bed | grep ^all > samp.01.bam.hist.all.txt

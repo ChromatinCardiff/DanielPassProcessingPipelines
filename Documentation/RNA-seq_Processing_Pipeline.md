@@ -28,6 +28,12 @@ awk '{if ($6 ~ /1000/) {print $0;} }' isoforms.gtf >primary-isoforms-only.gtf   
 ```
 
 <h3>Differential expression analysis with HTseq and EdgeR</h3>
+
+HTSeq, repeat for each sample
+```
+htseq-count -f 'bam' -s no -a 10 /home/GROUP-smbpk/sbi6dap/working/RNA-seq/working/ARA11/tophat/ES1_THout/accepted_hits.bam /home/GROUP-smbpk/sbi6dap/working/RNA-seq/Ath_ref_files/ARA11/Araport11_genes.20150701.gtf > /home/GROUP-smbpk/sbi6dap/working/RNA-seq/working/ARA11/HTSeq_out/ES1.count
+```
+EdgeR
 ```
 library("edgeR")
 setwd("~/Projects/ALD/RNAseq/HTSeq")
