@@ -44,22 +44,22 @@ for i in *DGE.xls; do sed 's/^\(AT.......\)\.[0-9]\+/\1/' $i >$i-gene; done
 for i in *xls; do sed 's/^\(AT.......\)\.[0-9]\+/\1/' $i | awk '!seen[$1]++' >$i.cut; done
 ```
 
-# Extract fasta sequence from a genome (bed format: chr \t start \t end)
+<b>Extract fasta sequence from a genome (bed format: chr \t start \t end)</b>
 ```
 bedtools getfasta -fi Bos_taurus.UMD3.1.dna.toplevel.fa -bed tmp.bed -fo mir23a_27a_24-2_604up1757down.fasta
 ```
 
-# Extract alignments that overlap with bed region
+<b>Extract alignments that overlap with bed region</b>
 ```
 intersectBed -abam BMR01out/accepted_hits.bam -b ../REFS/tmp.bed >ENSBTAG00000029996.bam
 ```
 
-# Coverage Histograms (Ref: http://www.gettinggeneticsdone.com/2014/03/visualize-coverage-exome-targeted-ngs-bedtools.html)
+<b>Coverage Histograms</b>(Ref: http://www.gettinggeneticsdone.com/2014/03/visualize-coverage-exome-targeted-ngs-bedtools.html)
 ```
 bedtools coverage -hist -abam samp.01.bam -b target_regions.bed | grep ^all > samp.01.bam.hist.all.txt
 ```
 
-# merge two files and fill gaps with zeros
+<b>merge two files and fill gaps with zeros</b>
 ```
 join -e '0' -o auto -a1 -a2 sort_uplist_GO.tsv sort_downlist_GO.tsv >updown_GO.tsv
 ```

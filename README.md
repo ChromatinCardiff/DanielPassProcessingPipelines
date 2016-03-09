@@ -3,7 +3,7 @@
 * [MNase-seq Standard Processing Pipeline (using danpos)](Documentation/MNase-seq_Processing_Pipeline.md)
 * [MNase-seq Processing Pipeline using totalcoverage approach](Documentation/MNase-seq_totalcoverage_Processing_Pipeline.md)
 * [RNA-seq Processing Pipeline](Documentation/RNA-seq_Processing_Pipeline.md)
-* [Metagenomics Processing Pipeline](Documentation/Metagenomics_Processing_Pipeline.md)
+* [Metagenomics Processing Pipeline](Documentation/Metagenomics_processing_pipeline.md)
 * [SLURM compute cluster](Documentation/SLURM_job_submission.md)
 * [Miscellaneous steps and tidbits](Documentation/Misc_steps.md)
 
