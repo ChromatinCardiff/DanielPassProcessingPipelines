@@ -1,2 +1,0 @@
-# merge two files and fill gaps with zeros
-join -e '0' -o auto -a1 -a2 sort_uplist_GO.tsv sort_downlist_GO.tsv >updown_GO.tsv
