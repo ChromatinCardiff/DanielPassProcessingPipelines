@@ -20,15 +20,16 @@ use Getopt::Std;
 my %options=();
 getopts('i:o:p:w:f:E', \%options);
 
-my $usage = "## USAGE: Example:$ SAMparser.pl -i infile.sam -o output_directory -f HISEQ
-								[REQUIRED]
-									-i infile.sam
-									-o outdirectory
-									-f {Flowcell ID}
-								[OPTIONAL]
-									-w {% window (default 0.2)}
-									-p {particle sizes(comma separated, default 0,100,150,300,450)}
-									-E {will change from SAM quality (default) to ELAND}\n";
+my $usage = "## USAGE: Example: SAMparser.pl -i infile.sam -o output_directory -f HISEQ
+	[REQUIRED]
+		-i infile.sam
+		-o outdirectory
+		-f {Flowcell ID}
+	[OPTIONAL]
+		-w {window size by percentage (No default, suggested 0.2)}
+		-W {window size in absolute bp (default: 10)}
+		-p {particle sizes(comma separated, default 100,150,300,450)}
+		-E {will change from SAM quality (default) to ELAND}\n";
 
 if (!%options){
 	print "~~\n$usage\n~~\n" and die;
@@ -66,9 +67,11 @@ if (-e $outdir){
 }
 
 if(exists $options{w}){
-	$pwind = $options{w};
+	$pwind = $options{w};	# Percentage size window #
+}elsif(exists $options{W}){
+	$pwind = $options{W}	# Fixed size window #
 }else{
-	$pwind = 0.2;
+	$pwind = 10;
 }
 
 if(exists $options{p}){
@@ -121,8 +124,13 @@ while(<IN>){
         foreach my $psize (@psizes){
 
             #print $psize."bp\n";
-            $phigh = ($psize + ($pwind * $psize));
-            $plow = ($psize - ($pwind * $psize));
+			if(exists $options{w}){
+            	$phigh = ($psize + ($pwind * $psize));
+            	$plow = ($psize - ($pwind * $psize));
+			}else{
+				$phigh = ($psize + $pwind);
+				$plow = ($psize - $pwind);
+			}
             my $posfile = $prefix."_".$psize.".txt";
 
             #print "$line[4] $line[8] plow=$plow phigh=$phigh\n";

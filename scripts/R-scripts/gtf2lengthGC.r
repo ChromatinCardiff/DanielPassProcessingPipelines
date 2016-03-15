@@ -9,10 +9,10 @@ biocLite("Rsamtools")
 library(GenomicRanges)
 library(rtracklayer)
 library(Rsamtools)
-setwd("~/Projects/NON-ATHAL/BMR/REFS/")
+setwd("~/Projects/REFDB/")
 
-GTFfile = "Bos_taurus.UMD3.1.83.gtf"
-FASTAfile = "Bos_taurus.UMD3.1.dna.toplevel.fa"
+GTFfile = "Araport11_genes.20151202.gtf"
+FASTAfile = "TAIR10_Chr.all.fasta"
 
 #Load the annotation and reduce it
 GTF <- import.gff(GTFfile, format="gtf", genome="UMD3.1.83", asRangedData=F, feature.type="exon")

@@ -100,11 +100,11 @@ combined.dec.df$gene <-  row.names(combined.dec.df)
 HTseq <- read.csv("/home/sbi6dap/Projects/ALD/RNAseq/ARA11/HTseq/alltags_edgeR.csv")
 RNAraw <- read.table("/home/sbi6dap/Projects/ALD/RNAseq/ARA11/HTseq/all.count", header=TRUE)
 
-DRcombined.dec.df <- merge(DRcombined.dec.df, HTseq, by = "gene", incomparables = NA)
-DRcombined.dec.df <- merge(DRcombined.dec.df, RNAraw, by = "gene", incomparables = NA)
+tmp.combined.dec.df <- merge(combined.dec.df, HTseq, by = "gene", incomparables = NA)
+DRcombined.dec.df <- merge(tmp.combined.dec.df, RNAraw, by = "gene", incomparables = NA)
 
-DRcombined.df <- merge(combined.df, HTseq, by = "gene", incomparables = NA)
-DRcombined.df <- merge(combined.df, RNAraw, by = "gene", incomparables = NA)
+tmp.combined.df <- merge(combined.df, HTseq, by = "gene", incomparables = NA)
+DRcombined.df <- merge(tmp.combined.df, RNAraw, by = "gene", incomparables = NA)
 
 #############
 ## Testing ##
@@ -224,7 +224,8 @@ q <- ggplot(data=DRcombined.dec.df, aes(x=log(norm.max.fold), y=logFC, alpha=0.2
 q + 
   geom_point(data = subset(DRcombined.dec.df, FDR <0.05), colour="red") +
   geom_point(data = subset(DRcombined.dec.df, FDR >0.05), colour="black") +
-  geom_smooth(data = subset(DRcombined.dec.df, FDR <0.05), se=TRUE, col="blue", lty=1)
-  geom_smooth(se=TRUE, col="blue", lty=2) 
-  geom_text_repel(data = subset(DRcombined.dec.fold, abs(logFC * log(norm.max.fold)) > 2), aes(label = gene)) 
+  #geom_smooth(data = subset(DRcombined.dec.df, FDR <0.05), se=TRUE, col="blue", lty=1) +
+  #geom_smooth(se=TRUE, col="blue", lty=2) 
+  geom_text_repel(data = subset(DRcombined.dec.fold, log(norm.max.fold) > 0.55 | log(norm.max.fold) < -1), aes(label = gene)) 
+  geom_text_repel(data = subset(DRcombined.dec.fold, logFC > 2 | logFC < -2), aes(label = gene))
 
