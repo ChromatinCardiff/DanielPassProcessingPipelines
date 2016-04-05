@@ -19,7 +19,7 @@ import plotly.graph_objs as go
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Import 3DG files for plotting')
+    parser = argparse.ArgumentParser(description='Import Bam file and extract defined region for 2D or 3D plotting')
     parser.add_argument('-i', required=True, help='Input Bam file')
     parser.add_argument('-o', help='Output prefix')
     parser.add_argument('-b', help='Regions to extract (Bed file)')
@@ -27,18 +27,41 @@ if __name__ == '__main__':
     parser.add_argument('-e', default=0, type=int, help='Integer for upstream/downstream extension')
     parser.add_argument('-r', default=10, type=int, help='Integer for rounding counts (size and base position)')
     parser.add_argument('-p', default="3D", help='Choose plot type (2D or 3D, default:3D)')
+    parser.add_argument('-t', action='store_true', help='Use default co-ordinates for testing')
 
     args = parser.parse_args()
 
 def main():
+    # Load sam/bamfile
     samfile = pysam.AlignmentFile(args.i, "rb")
 
-    chrom = 'Chr1'
-    regionStart = 16869721 - args.e
-    regionEnd = 16873927 + args.e
-    cdsStart = 16869921
+    # Load start/end regions
+    if args.t is True:
+        print "Using built in test co-ordinates: Chr1 16869721 16873927 | ~!NOT REAL RUN DATA!~ |"
+        chrom = 'Chr1'
+        regionStart = 16869721 - args.e
+        regionEnd = 16873927 + args.e
+
+    elif args.b is None and args.B is None:
+        print "Exiting as no co-ordinates given"
+        quit()
+
+    elif args.b is not None:
+        print "Not supported yet"
+        quit()
+
+    elif args.B is not None:
+        print "Setting extraction co-ordinates from command line"
+
+        bedParams = args.B.split(',')
+        chrom = bedParams[0]
+        regionStart = int(bedParams[1]) - args.e
+        regionEnd = int(bedParams[2]) + args.e
+
+    #cdsStart = 16869921
 
     #kde = kdeTransform(poslist,sizelist)
+
     if args.p == "2D":
         (poslist,sizelist) = simpleExtract(samfile,chrom, regionStart, regionEnd)
         samfile.close()
@@ -46,10 +69,9 @@ def main():
         make2dHist(poslist,sizelist, regionStart, regionEnd)
 
     elif args.p == "3D":
-        surfaceDict = regionExtract(samfile,chrom, regionStart, regionEnd)
+        surfaceMat = regionExtract(samfile,chrom, regionStart, regionEnd)
         samfile.close()
 
-        surfaceMat = makeSurfaceArray(surfaceDict)
         make3dPlot(surfaceMat, regionStart, regionEnd)
 
 
@@ -84,9 +106,16 @@ def regionExtract(samfile,chr,start,end):
             #    sizeDict[size][pos] = 1
             pos += 1
 
-    #print sizeDict.keys()
+    # Sort and save dictionary by size and position
+    surfaceMat = []
 
-    return sizeDict
+    for k in sorted(sizeDict.keys()):
+        internalList = []
+        for j in sorted(sizeDict[k].keys()):
+            internalList.append(sizeDict[k][j])
+        surfaceMat.append(list(internalList))
+
+    return surfaceMat
 
 def simpleExtract(samfile,chr,start,end):
     m1 = []
@@ -114,20 +143,6 @@ def simpleExtract(samfile,chr,start,end):
             pos += 1
 
     return (m1,m2)
-
-def makeSurfaceArray(regionDict):
-    surfaceMat = []
-
-    for k in sorted(regionDict.keys()):
-
-        internalList = []
-        for j in sorted(regionDict[k].keys()):
-            internalList.append(regionDict[k][j])
-
-        surfaceMat.append(list(internalList))
-
-    #print surfaceMat
-    return surfaceMat
 
 def kdeTransform(poslist,sizelist):
     #data=numpy.random.multivariate_normal(mu,surfaceMat,1000)

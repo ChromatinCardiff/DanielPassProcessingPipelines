@@ -27,6 +27,30 @@ grep -v 'FPKM "0.0000000000"' allgenes.gtf >isoforms.gtf                        
 awk '{if ($6 ~ /1000/) {print $0;} }' isoforms.gtf >primary-isoforms-only.gtf       #extract only primary isoform (having both would be useful in some cases)
 ```
 
+<h2>Annotating novel genome with RNAseq data</h2>
+
+```
+#Map to genome without reference gtf
+tophat2 -p 32 -o AGM1_THout REFS/Ler0_FJ fastqs/AGM1_R1.fastq fastqs/AGM1_R2.fastq
+
+# Assemble mapped reads
+cufflinks -p 16 -o cufflinks/AGM19 AGM19_acc.bam
+
+# Merge replicates
+cuffmerge -s REFS/Ler0_FJ.fa -o WT_cuffmerge -p 8 WT_assembly_list.txt
+cuffmerge -s REFS/Ler0_FJ.fa -o g_cuffmerge -p 8 g_assembly_list.txt
+
+#Compare between treatments and make one final GTF
+cuffcompare -o WT_vs_g_cuffcompare -s REFS/Ler0_FJ.fa WT_cuffmerge/merged.gtf g_cuffmerge/merged.gtf
+
+# Extraxt fasta sequence for annotation
+gffread WT_vs_g54_cuffcompare.combined.gtf -g ~/axon_scratch/REFS/Ler0_FJ.fa -w WT_vs_g54_cuffcompare.combined.fasta -i 450
+
+# Annotate fasta
+blastn -query WT_vs_g54_cuffcompare.combined.fasta -db ~/db/nt-nuc -max_target_seqs 1 -outfmt 6 -evalue 1e-5 -num_threads 16 -out WT_vs_g54_cuffcompare.combined.blastn
+```
+
+
 <h3>Differential expression analysis with HTseq and EdgeR</h3>
 
 HTSeq, repeat for each sample
