@@ -25,7 +25,8 @@ if __name__ == '__main__':
     parser.add_argument('-b', help='Regions to extract (Bed file)')
     parser.add_argument('-B', help='Individual set of co-ordinates in Chr1,1000,1500 format (include commas)')
     parser.add_argument('-e', default=0, type=int, help='Integer for upstream/downstream extension')
-    parser.add_argument('-r', default=10, type=int, help='Integer for rounding counts (size and base position)')
+    parser.add_argument('-q', default=10, type=int, help='Integer for rounding counts (size of fragment)')
+    parser.add_argument('-r', default=50, type=int, help='Integer for rounding counts (base position)')
     parser.add_argument('-p', default="3D", help='Choose plot type (2D or 3D, default:3D)')
     parser.add_argument('-t', action='store_true', help='Use default co-ordinates for testing')
 
@@ -41,6 +42,7 @@ def main():
         chrom = 'Chr1'
         regionStart = 16869721 - args.e
         regionEnd = 16873927 + args.e
+        regionLength = regionEnd - regionStart
 
     elif args.b is None and args.B is None:
         print "Exiting as no co-ordinates given"
@@ -57,6 +59,8 @@ def main():
         chrom = bedParams[0]
         regionStart = int(bedParams[1]) - args.e
         regionEnd = int(bedParams[2]) + args.e
+        regionLength = regionEnd - regionStart
+
 
     #cdsStart = 16869921
 
@@ -66,13 +70,13 @@ def main():
         (poslist,sizelist) = simpleExtract(samfile,chrom, regionStart, regionEnd)
         samfile.close()
 
-        make2dHist(poslist,sizelist, regionStart, regionEnd)
+        make2dHist(poslist,sizelist, regionStart, regionEnd, regionLength)
 
     elif args.p == "3D":
         surfaceMat = regionExtract(samfile,chrom, regionStart, regionEnd)
         samfile.close()
 
-        make3dPlot(surfaceMat, regionStart, regionEnd)
+        make3dPlot(surfaceMat, regionStart, regionEnd, regionLength)
 
 
 def regionExtract(samfile,chr,start,end):
@@ -87,7 +91,7 @@ def regionExtract(samfile,chr,start,end):
             sizeDict[x][y] = 0
             #print x, y
             y +=  args.r
-        x += args.r
+        x += args.q
 
     for read in samfile.fetch(chr, start, end):
         #pos = read.reference_start
@@ -97,7 +101,7 @@ def regionExtract(samfile,chr,start,end):
         #size = int(round(abs(read.template_length), -1))
 
         pos = (int(read.reference_start / args.r)) * args.r
-        size = (int(abs(read.template_length) / args.r)) * args.r
+        size = (int(abs(read.template_length) / args.q)) * args.q
 
         while pos <= read.reference_end:
             if pos in sizeDict[size]:
@@ -162,7 +166,8 @@ def kdeTransform(poslist,sizelist):
     return kde
 
 
-def make3dPlot(surfaceMatrix, regionStart, regionEnd):
+def make3dPlot(surfaceMatrix, regionStart, regionEnd, regionLength):
+    upstream = (float(args.e) / regionLength) * 100
 
     # position in [] is x co-ord, position in [[]] is y co-ord, number is z co-ord
     data = [go.Surface(z=surfaceMatrix)]
@@ -189,13 +194,15 @@ def make3dPlot(surfaceMatrix, regionStart, regionEnd):
                 title="Genomic Co-ordinates",
                 titlefont=dict(
                     family='Arial, sans-serif',
-                    size=18,
+                    size=31,
                     #color='lightgrey'
                 ),
                 #type='log',
                 #autorange=False,
-                ticktext=[str(regionStart), str(regionEnd)],
-                tickvals=[0,400]
+                ticks='inside',
+                showgrid=True,
+                ticktext=["-" + str(args.e),str(regionStart + args.e), str(regionEnd - args.e), "+" + str(args.e)],
+                tickvals=[0, upstream, (100 - upstream), 100]
             )
         )
     )
@@ -204,7 +211,7 @@ def make3dPlot(surfaceMatrix, regionStart, regionEnd):
     outname = str(args.i) + "-3Dsurface.html"
     plotly.offline.plot(fig, filename=outname)
 
-def make2dHist(poslist, sizelist, regionStart, regionEnd):
+def make2dHist(poslist, sizelist, regionStart, regionEnd, regionLength):
 
     trace1 = go.Histogram2dContour(
         x=poslist,
@@ -228,7 +235,7 @@ def make2dHist(poslist, sizelist, regionStart, regionEnd):
                 #color='lightgrey'
             ),
             type='log',
-            range=[50,1000]
+            autorange=True
         ),
         xaxis=dict(
             title="Genomic Co-ordinates",
@@ -238,18 +245,18 @@ def make2dHist(poslist, sizelist, regionStart, regionEnd):
                 #color='lightgrey'
             )
         ),
-        shapes = [{
-            'type': 'line',
-            'x0': 16869721,
-            'y0': 50,
-            'x1': 16873927,
-            'y1': 50,
-            'line': {
-                'color': 'rgb(50, 171, 96)',
-                'width': 10,
-                'dash': 'dashdot',
-            }
-        }]
+        # shapes = [{
+        #     'type': 'line',
+        #     'x0': 16869721,
+        #     'y0': 50,
+        #     'x1': 16873927,
+        #     'y1': 50,
+        #     'line': {
+        #         'color': 'rgb(50, 171, 96)',
+        #         'width': 10,
+        #         'dash': 'dashdot',
+        #     }
+        # }]
     )
 
     fig = go.Figure(data=data, layout=layout)
