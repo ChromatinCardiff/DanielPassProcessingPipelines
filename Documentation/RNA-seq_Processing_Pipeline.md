@@ -43,7 +43,7 @@ cuffmerge -s REFS/Ler0_FJ.fa -o g_cuffmerge -p 8 g_assembly_list.txt
 #Compare between treatments and make one final GTF
 cuffcompare -o WT_vs_g_cuffcompare -s REFS/Ler0_FJ.fa WT_cuffmerge/merged.gtf g_cuffmerge/merged.gtf
 
-# Extraxt fasta sequence for annotation
+# Extract fasta sequence for annotation
 gffread WT_vs_g54_cuffcompare.combined.gtf -g ~/axon_scratch/REFS/Ler0_FJ.fa -w WT_vs_g54_cuffcompare.combined.fasta -i 450
 
 # Annotate fasta

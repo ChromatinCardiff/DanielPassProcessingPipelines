@@ -1,7 +1,7 @@
 library("edgeR")
 setwd("~/Projects/ALD/RNAseq/ARA11/HTseq")
-setwd("~/Projects/HJR/")
-samples <- read.table("samples.txt", header=TRUE)
+
+samples <- read.table("samples_LD.txt", header=TRUE)
 
 counts = readDGE(samples$countf)$counts
 
@@ -27,7 +27,7 @@ d = estimateTagwiseDisp(d)
 plotMeanVar(d, show.tagwise.vars=TRUE, NBline=TRUE)
 plotBCV(d)
 
-de = exactTest(d, pair=c("stagep12", "stagep15"))        ## AKA Fischers exact test
+de = exactTest(d, pair=c("16h-Light", "16h-Dark"))        ## AKA Fischers exact test
 
 tt = topTags(de, n=nrow(d))
 head(tt$table)
@@ -38,3 +38,22 @@ head(nc[rn,order(samples$condition)],5)
 deg = rn[tt$table$FDR < .05]
 plotSmear(d, de.tags=deg)
 write.csv(tt$table, file="alltags_edgeR-filter<1m.csv")
+
+
+####### Gene barchart
+
+library(ggplot2)
+library(reshape2)
+
+x <- data.frame(exp=d$pseudo.counts["AT1G44575", ])
+x <- data.frame(head(d$pseudo.counts, 10))
+cats <- c("Light", "Dark", "Light", "Dark", "Light", "Dark", "Light", "Dark")
+x <- cbind(x, cats)
+x2 <- summarySE(x, measurevar="exp", groupvars=c("cats"))
+
+ggplot(x2, aes(x=cats, y=log(exp))) +
+  geom_bar(stat="identity") +
+  geom_errorbar(aes(ymin=log(exp-se), ymax=log(exp+se)), width=.2, position=position_dodge(.9))
+  
+facet_wrap(~Keyword.Category, nrow=1)
+

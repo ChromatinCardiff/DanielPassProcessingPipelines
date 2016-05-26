@@ -142,7 +142,8 @@ while(<IN>){
                 if($line[8] > 0){
                   my $pos = ($line[3] + ($line[8] * 0.5));
                   select $handles[$psize];
-									#Chromosome | dyad start | size | apex position
+
+				#Chromosome | dyad start | size | apex position
                   print "$line[2]\t$line[3]\t$line[8]\t$pos\n";
                 }
             }

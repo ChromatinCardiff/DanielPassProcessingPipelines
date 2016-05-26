@@ -25,11 +25,11 @@ if __name__ == '__main__':
     parser.add_argument('-i', help='Input a Bam file or a list of comma-separated Bam files to merge (format: one.bam,two.bam,three.bam)')
     parser.add_argument('-o', help='Output prefix')
     parser.add_argument('-b', help='Regions to extract (Bed file)')
-    parser.add_argument('-B', help='Individual set of co-ordinates in bed format (`Chr1;1000-1510`) (include surrounding quotes to escape semi-colon)')
+    parser.add_argument('-B', help='Individual set of co-ordinates in bed format (`Chr1:1000-1510`) (Requires surrounding quotes to escape semi-colon)')
     parser.add_argument('-g', help='Gene transcript to get positional information from | REQUIRES GTF FILE (-G)')
     parser.add_argument('-G', help='gtf file to get gene model information from | REQUIRES GENE/TRANSCRIPT ID')
     parser.add_argument('-e', default=0, type=int, help='Integer for upstream/downstream extension')
-    parser.add_argument('-q', default=10, type=int, help='Integer for rounding counts (size of fragment)')
+    parser.add_argument('-q', default=20, type=int, help='Integer for rounding counts (size of fragment)')
     parser.add_argument('-r', default=50, type=int, help='Integer for rounding counts (base position)')
     parser.add_argument('-p', default="2D", help='Choose plot type (2D or 3D, default:2D)')
     parser.add_argument('-t', action='store_true', help='Use default co-ordinates for testing')
@@ -78,10 +78,13 @@ def main():
         make2dHist(globalX,globalY,boundD)
 
     elif args.p == "3D":
-        surfaceMat = regionExtract(samfile,chrom, regionStart, regionEnd)
-        samfile.close()
+        print "Currently broken for multiple input files. Only use one at a time"
+        for samfile in sampleList:
+            print "Processing samfile"
+            surfaceMat = regionExtract(samfile, boundD)
+            samfile.close()
 
-        make3dPlot(surfaceMat, regionStart, regionEnd, regionLength)
+        make3dPlot(surfaceMat, boundD)
 
 def defineRegions():
 
@@ -95,18 +98,35 @@ def defineRegions():
         boundD['TSS'] = 16869721
         boundD['TTS'] = 16873927
 
+    elif args.g is not None:
+        gtfFile = open(args.G, 'rb')
+        gene = args.g
+
+        for line in gtfFile:
+            if re.search(gene, line):
+                if re.search("5UTR", line):
+                    gline = line.split('\t')
+                    boundD['chrom'] = gline[0]
+                    boundD['TSS'] = int(gline[3])
+                if re.search("3UTR", line):
+                    gline = line.split('\t')
+                    boundD['TTS'] = int(gline[4])
+
+        print "Gene Boundaries:"
+        print boundD['chrom'],boundD['TSS'],boundD['TTS']
+
     elif args.b is None and args.B is None:
-        print "Exiting as no co-ordinates given"
+        print "Exiting as no co-ordinates given provide a gene using -g"
         quit()
 
     elif args.b is not None:
-        print "Not supported yet"
+        print "retired method, use gene name and gtf instead"
         quit()
 
     elif args.B is not None:
         print "Setting extraction co-ordinates from command line"
 
-        b1 = args.B.split(';')
+        b1 = args.B.split(':')
         boundD['chrom'] = b1[0]
         b2 = b1[1].split('-')
         boundD['TSS'] = int(b2[0])
@@ -119,21 +139,21 @@ def defineRegions():
     return boundD
     #return(chrom,regionStart,regionEnd,regionLength)
 
-def regionExtract(samfile,chr,start,end):
+def regionExtract(samfile,boundD):
 
     #sizeDict = {}
     sizeDict = defaultdict(dict)
 
     x = 0
     while x <= 1001:
-        y = start
-        while y <= end:
+        y = boundD['rangeStart']
+        while y <= boundD['rangeEnd']:
             sizeDict[x][y] = 0
             #print x, y
             y +=  args.r
         x += args.q
 
-    for read in samfile.fetch(chr, start, end):
+    for read in samfile.fetch(boundD['chrom'],boundD['rangeStart'],boundD['rangeEnd']):
         #pos = read.reference_start
         #size = abs(read.template_length)
 
@@ -250,8 +270,8 @@ def buildGeneModel():
 
     return geneModel
 
-def make3dPlot(surfaceMatrix, regionStart, regionEnd, regionLength):
-    upstream = (float(args.e) / regionLength) * 100
+def make3dPlot(surfaceMatrix, boundD):
+    upstream = (float(args.e) / boundD['glen']) * 100
 
     # position in [] is x co-ord, position in [[]] is y co-ord, number is z co-ord
     data = [go.Surface(z=surfaceMatrix)]
@@ -285,11 +305,12 @@ def make3dPlot(surfaceMatrix, regionStart, regionEnd, regionLength):
                 #autorange=False,
                 ticks='inside',
                 showgrid=True,
-                ticktext=["-" + str(args.e),str(regionStart + args.e), str(regionEnd - args.e), "+" + str(args.e)],
+                ticktext=["-" + str(args.e),str(boundD['rangeStart'] + args.e), str(boundD['rangeEnd'] - args.e), "+" + str(args.e)],
                 tickvals=[0, upstream, (100 - upstream), 100]
             )
         )
     )
+    shapes = buildGeneModel()
 
     fig = go.Figure(data=data, layout=layout)
     outname = str(args.i) + "-3Dsurface.html"

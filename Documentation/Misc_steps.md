@@ -44,7 +44,7 @@ for i in *DGE.xls; do sed 's/^\(AT.......\)\.[0-9]\+/\1/' $i >$i-gene; done
 for i in *xls; do sed 's/^\(AT.......\)\.[0-9]\+/\1/' $i | awk '!seen[$1]++' >$i.cut; done
 ```
 
-<b>Extract fasta sequence from a genome (bed format: chr \t start \t end)</b>
+<b>Extract fasta sequence from a genome (bed format: chr \t start \t end). Can use gff instead of bed with same -bed flag.</b>
 ```
 bedtools getfasta -fi Bos_taurus.UMD3.1.dna.toplevel.fa -bed tmp.bed -fo mir23a_27a_24-2_604up1757down.fasta
 ```
@@ -52,6 +52,11 @@ bedtools getfasta -fi Bos_taurus.UMD3.1.dna.toplevel.fa -bed tmp.bed -fo mir23a_
 <b>Extract alignments that overlap with bed region</b>
 ```
 intersectBed -abam BMR01out/accepted_hits.bam -b ../REFS/tmp.bed >ENSBTAG00000029996.bam
+```
+
+<b>extract gff columns to make bed format</b>
+```
+awk '{print $1 ":" $4 "-" $5 "\t" $0}' edit_Ler_cuffmatch_gene.gff >edit_Ler_cuffmatch_gene2.gff
 ```
 
 <b>Coverage Histograms</b>(Ref: http://www.gettinggeneticsdone.com/2014/03/visualize-coverage-exome-targeted-ngs-bedtools.html)
@@ -62,4 +67,9 @@ bedtools coverage -hist -abam samp.01.bam -b target_regions.bed | grep ^all > sa
 <b>merge two files and fill gaps with zeros</b>
 ```
 join -e '0' -o auto -a1 -a2 sort_uplist_GO.tsv sort_downlist_GO.tsv >updown_GO.tsv
+```
+
+<b>Sort by first column only (-u uniq, -t delimiter, -k1,1 key field is col1)</b>
+```
+sort -u -t, -k1,1 file
 ```

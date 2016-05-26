@@ -5,7 +5,7 @@ use warnings;
 #################################################################################
 # Written by Nick Kent, Jan 2011
 # Fiddled with: Nick Kent, Dec 12th 2011
-# Editied by Dan Pass 2015 
+# Editied by Dan Pass 2015
 #
 # This script takes the .txt output files from SAMparser2.pl and calculates a
 # frequency distribution for paired read insert size dyad position values within
@@ -20,14 +20,16 @@ my %options=();
 getopts('i:o:b:p:A', \%options);
 
 my $usage = "## USAGE: sgr_builder.pl -i infile.txt -o outfile.sgr -p chromosome_sizes.txt
-[REQUIRED] 
-  -i infile.txt 
-  -o outfile.sgr 
-  -p {chromosome size file. Format: NAME[tab]size} 
+[REQUIRED]
+  -i infile.txt
+  -o outfile.sgr
+  -p {chromosome size file. Format: NAME[tab]size}
 [OPTIONAL]
   -b {bin width (default: 10)}
   -A Do a three bin average on the data (Default OFF). Also, broken
-NOTE: Parameter file format:\nChr1  10002020\nChr2  1241414\nChr3 1308571\nABCDEFG  123456\n";
+NOTE: Parameter file format:\nChr1  10002020\nChr2  1241414\nChr3 1308571\nABCDEFG  123456\n
+
+NOTE 2: Make sure the chromosome names match in your reference otherwise everything fails";
 
 if (!%options){
   print "~~\n$usage\n~~\n" and die;
@@ -81,7 +83,9 @@ print "Calculating bin abundances\n";
 while(<IN>){
   # split line by delimiter and store elements in an array
   @line = split('\t',$_);
+  #print "$line[0]\tline[3]\t";
   my $bin = (int($line[3]/$bin_width))*$bin_width;
+  #print "$bin\n";
   #print "Chr: $line[0]\tbin:$bin\tPos:$line[3]\n";
   $binhash{$line[0]}{$bin} = $binhash{$line[0]}{$bin} + 1;
 }
