@@ -14,7 +14,7 @@ x <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks-RNA-guided/mean
 summary(x)
 
 tmp <- read.table("/home/sbi6dap/Projects/ALD/totalcoverage/mean_ESS_heatmap/LDcommonmodel-ARA11.genepred.ess.ES09_totalcov.Fnor.wig.heatmap_1st-exon.xls.cut", header=TRUE, sep="\t", row.names=1)
-
+tmp <- read.table("/home/sbi6dap/Projects/ALD/totalcoverage/size_comparisons/ALL_TSS/tss.ES09_lt120_DGE.xls-nodup")
 
 # Processing
 rownames(x) <-x$pos
@@ -137,7 +137,7 @@ p +
   geom_line(aes(x=pos, y=ES10_150), colour="Green") +     # High
   geom_line(aes(x=pos, y=ES14_150), colour="Green") +     # High
   geom_line(aes(x=pos, y=Marg_150), colour="Black") +
-  geom_line(aes(x=pos, y=AM1_150), colour="Darkblue", ) +
+  geom_line(aes(x=pos, y=AM1_150), colour="Darkblue" ) +
   geom_line(aes(x=pos, y=AM2_150), colour="Darkblue") +
   geom_line(aes(x=pos, y=AM3_150), colour="Darkblue") +
   scale_x_continuous(breaks = pretty_breaks(n=12)) +

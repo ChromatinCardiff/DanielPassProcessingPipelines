@@ -1,5 +1,13 @@
 
-<h3>From FASTQ to SGR</h3>
+Quickstart MNaseseq pipeline:
+```
+bowtie -v 3 --maxins 5000 --fr -k 1  -p 12 --sam indexes/TAIR10 -1 infile_R1.fastq -2 infile_R2.fastq bowtie/infile.sam -t
+SAMparser2.pl -i infile.sam -o outdirectory -f HISEQ -p 80,150,350,500,680,860
+sgr_builder.pl -i infile_150.txt -o outfile.sgr -a 3
+sgr2wig.pl input.sgr output.wig
+```
+
+<h3>From FASTQ to SGR/WIG</h3>
 <b>Bowtie command</b>
 ```
 bowtie -v 3 --maxins 5000 --fr -k 1  -p 12 --sam indexes/TAIR10 -1 ES10_TCGGCA_L002_R1_001.fastq -2 ES10_TCGGCA_L002_R2_001.fastq bowtie1/ES10_50bp.sam -t
@@ -10,17 +18,27 @@ bowtie -v 3 --maxins 5000 --fr -k 1  -p 12 --sam indexes/TAIR10 -1 ES10_TCGGCA_L
 SAMparser2.pl -i infile.sam -o outdirectory -f HISEQ -p 0,80,150,350,500,680,860
 ```
 
-<b>To extract Chromosomes from sam file (not cleverly)</b>
+<b>Generate SGR files</b>
 ```
-chr_split.sh
-	grep -w 'Chr1' ES16.sam >Chr1_grep.txt &
-	grep -w 'Chr2' ES16.sam >Chr2_grep.txt &
-	grep -w 'Chr3' ES16.sam >Chr3_grep.txt &
-	grep -w 'Chr4' ES16.sam >Chr4_grep.txt &
-	grep -w 'Chr5' ES16.sam >Chr5_grep.txt &
-	grep -w 'mitochondria' ES16.sam >mito_grep.txt &
-	grep -w 'chloroplast' ES16.sam >chloro_grep.txt &
+sgr_builder.pl -i infile_150.txt -o outfile.sgr
+optional:
+	-p chromosome-sizes.txt 	# Load chromosome sizes for other species
+	-a 3 	# 3 bin averaging
+
 ```
+$ At_chr_sizes.txt
+  Chr1	1251
+	Chr2	55324
+	Chr3	9876
+	ABC		123
+```
+
+<b>convert sgr to wig</b>
+```
+sgr2wig.pl input.sgr output.wig
+```
+
+
 <b>To generate histograms (for each file/chomosome)</b>
 ```
 for i in *_grep.txt; do (cut -f9 $i | sed 's/-//' | sort -n | uniq -c > $i.hist &); done
@@ -32,23 +50,8 @@ awk '{arr[$2]+=$1} END {for (key in arr) printf("%s\t%s\n", key, arr[key])}' tem
 ```
 Use basic_smooth-norm.r to chart
 
-<b>Generate SGR files</b>
-```
-sgr_builder.pl -i infile_150.txt -o outfile.sgr -p At_chr_sizes.txt
-
-$ At_chr_sizes.txt
-  Chr1	1251
-	Chr2	55324
-	Chr3	9876
-	ABC		123
-```
-
 <h3>Using danpos</h3>
 
-<b>convert sgr to wig</b>
-```
-sgr2wig.pl input.sgr output.wig
-```
 <b>Identify peaks</b>
 ```
 #Numbers are reads which mapped to genome

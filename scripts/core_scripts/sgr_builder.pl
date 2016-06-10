@@ -17,7 +17,7 @@ use warnings;
 use Getopt::Std;
 
 my %options=();
-getopts('i:o:b:p:A', \%options);
+getopts('i:o:b:p:a:h', \%options);
 
 my $usage = "## USAGE: sgr_builder.pl -i infile.txt -o outfile.sgr -p chromosome_sizes.txt
 [REQUIRED]
@@ -26,12 +26,13 @@ my $usage = "## USAGE: sgr_builder.pl -i infile.txt -o outfile.sgr -p chromosome
   -p {chromosome size file. Format: NAME[tab]size}
 [OPTIONAL]
   -b {bin width (default: 10)}
-  -A Do a three bin average on the data (Default OFF). Also, broken
+  -a INT Do a bin average on the data (Default OFF, recommended 3).
+  -h print this helpful help page
+
 NOTE: Parameter file format:\nChr1  10002020\nChr2  1241414\nChr3 1308571\nABCDEFG  123456\n
+NOTE 2: Make sure the chromosome names match in your reference otherwise everything fails!";
 
-NOTE 2: Make sure the chromosome names match in your reference otherwise everything fails";
-
-if (!%options){
+if (!%options || exists $options{h}){
   print "~~\n$usage\n~~\n" and die;
 }
 
@@ -46,10 +47,24 @@ if(exists $options{b}){
   my $bin_width = $options{b};
 }
 
+# Bin averaging
+my $binavg = 1;
+if(exists $options{a}){
+  $binavg = $options{a};
+}else{
+    print "Not averaging over bins, remmember to pass e.g. -a 3 to average (or other value)\n";
+}
+
 my @chrsize;
 if(exists $options{p}){
   print "Reading chromosome sizes\n";
   my $parafile = $options{p};
+  open(PARA, '<', $parafile) or die "Unable to access Chromosome size parameter file: $parafile $!";
+  chomp(@chrsize = <PARA>);
+}else{
+  print "Using Arabidopsis thaliana chromosomes as you didn't say otherwise!\n";
+  my $parafile = "/home/sbi6dap/Projects/DansProcessingPipeline/scripts/core_scripts/Atha_chr_sizes.txt";
+  print "Loading chromosome sizes from $parafile\n";
   open(PARA, '<', $parafile) or die "Unable to access Chromosome size parameter file: $parafile $!";
   chomp(@chrsize = <PARA>);
 }
@@ -92,8 +107,24 @@ while(<IN>){
 close(IN);
 
 # Calculate the 3 bin moving average
-if (exists $options{A}){
-  print "THIS ISNT DOING AN AVERAGE BECAUSE I DIDNT COME BACK AND IMPLEMENT IT\n";
+if (exists $options{a}){
+  open(OUT, '>', $outfile) or die "Unable to open $outfile: $!";
+  # Export bin counts per chromosome;
+  for my $chr (sort keys %binhash){
+    print "Processing $chr\n";
+    for my $binout (sort {$a <=> $b} keys %{$binhash{$chr}}){
+        my $blast = $binout - 10;
+        my $bnext = $binout + 10;
+        my $binaverage;
+        if (!exists($binhash{$chr}{$blast}) || !exists($binhash{$chr}{$bnext})){
+            #print "cant find" . $binhash{$chr}{$binout-1} . "\n";
+            next;
+        }else{
+            $binaverage = sprintf("%.3f",($binhash{$chr}{$blast} + $binhash{$chr}{$binout} + $binhash{$chr}{$bnext}) / $binavg);
+        }
+        print OUT "$chr\t$binout\t$binaverage\n";
+    }
+  }
 }else{
   open(OUT, '>', $outfile) or die "Unable to open $outfile: $!";
   # Export bin counts per chromosome;

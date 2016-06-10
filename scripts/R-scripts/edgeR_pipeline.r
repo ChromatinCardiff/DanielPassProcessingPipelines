@@ -45,15 +45,16 @@ write.csv(tt$table, file="alltags_edgeR-filter<1m.csv")
 library(ggplot2)
 library(reshape2)
 
-x <- data.frame(exp=d$pseudo.counts["AT1G44575", ])
-x <- data.frame(head(d$pseudo.counts, 10))
+x <- data.frame(exp=d$pseudo.counts["AT4G12800", ])
+#x <- data.frame(head(d$pseudo.counts, 10))
 cats <- c("Light", "Dark", "Light", "Dark", "Light", "Dark", "Light", "Dark")
 x <- cbind(x, cats)
 x2 <- summarySE(x, measurevar="exp", groupvars=c("cats"))
 
 ggplot(x2, aes(x=cats, y=log(exp))) +
   geom_bar(stat="identity") +
-  geom_errorbar(aes(ymin=log(exp-se), ymax=log(exp+se)), width=.2, position=position_dodge(.9))
+  geom_errorbar(aes(ymin=log(exp-ci), ymax=log(exp+ci)), width=.2, position=position_dodge(.9))
+  ylim(6.25,6.75)
   
 facet_wrap(~Keyword.Category, nrow=1)
 

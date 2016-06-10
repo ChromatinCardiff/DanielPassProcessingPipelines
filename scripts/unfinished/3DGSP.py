@@ -18,19 +18,22 @@ from sklearn.neighbors import KernelDensity
 import plotly
 import plotly.graph_objs as go
 
-
+## Define some parameters IF YOU WANT TO SAVE TYPING! ##
+SAMdir = "/home/sbi6dap/RawData/ALD/MNase-seq/SAMs/"
+GTFFile = "/home/sbi6dap/Projects/REFDB/Araport11_genes.20151202.gtf"
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Import Bam file and extract defined region for 2D or 3D plotting')
     parser.add_argument('-i', help='Input a Bam file or a list of comma-separated Bam files to merge (format: one.bam,two.bam,three.bam)')
+    parser.add_argument('-d', default=SAMdir, help='Optional: Directory where bamfiles are (saves on typing!)')
     parser.add_argument('-o', help='Output prefix')
     parser.add_argument('-b', help='Regions to extract (Bed file)')
     parser.add_argument('-B', help='Individual set of co-ordinates in bed format (`Chr1:1000-1510`) (Requires surrounding quotes to escape semi-colon)')
     parser.add_argument('-g', help='Gene transcript to get positional information from | REQUIRES GTF FILE (-G)')
-    parser.add_argument('-G', help='gtf file to get gene model information from | REQUIRES GENE/TRANSCRIPT ID')
-    parser.add_argument('-e', default=0, type=int, help='Integer for upstream/downstream extension')
-    parser.add_argument('-q', default=20, type=int, help='Integer for rounding counts (size of fragment)')
-    parser.add_argument('-r', default=50, type=int, help='Integer for rounding counts (base position)')
+    parser.add_argument('-G', default=GTFFile, help='gtf file to get gene model information from | REQUIRES GENE/TRANSCRIPT ID')
+    parser.add_argument('-e', default=500, type=int, help='Integer for upstream/downstream extension')
+    parser.add_argument('-q', default=10, type=int, help='Integer for rounding counts (fragment size, default: 10)')
+    parser.add_argument('-r', default=50, type=int, help='Integer for rounding counts (bases, default: 50)')
     parser.add_argument('-p', default="2D", help='Choose plot type (2D or 3D, default:2D)')
     parser.add_argument('-t', action='store_true', help='Use default co-ordinates for testing')
 
@@ -44,8 +47,12 @@ def main():
         samlist = args.i.split(',')
         i = 1
         for file in samlist:
-            print "Reading in file:" + file
-            f = pysam.AlignmentFile(file, "rb")
+            print "Reading in file:", args.d + file
+            if args.d:
+                filepath = args.d + file
+                f = pysam.AlignmentFile(filepath, "rb")
+            else:
+                f = pysam.AlignmentFile(file, "rb")
             sampleList.append(f)
             i += 1
     else:
@@ -98,6 +105,9 @@ def defineRegions():
         boundD['TSS'] = 16869721
         boundD['TTS'] = 16873927
 
+    if args.G is None:
+        print "Using default gtf file location as none was defined:", args.G
+
     elif args.g is not None:
         gtfFile = open(args.G, 'rb')
         gene = args.g
@@ -107,10 +117,16 @@ def defineRegions():
                 if re.search("5UTR", line):
                     gline = line.split('\t')
                     boundD['chrom'] = gline[0]
-                    boundD['TSS'] = int(gline[3])
+                    if gline[6] == "+":
+                        boundD['TSS'] = int(gline[3])
+                    else:
+                        boundD['TSS'] = int(gline[4])
                 if re.search("3UTR", line):
                     gline = line.split('\t')
-                    boundD['TTS'] = int(gline[4])
+                    if gline[6] == "+":
+                        boundD['TTS'] = int(gline[4])
+                    else:
+                        boundD['TTS'] = int(gline[3])
 
         print "Gene Boundaries:"
         print boundD['chrom'],boundD['TSS'],boundD['TTS']
@@ -170,13 +186,14 @@ def regionExtract(samfile,boundD):
             #    sizeDict[size][pos] = 1
             pos += 1
 
+
     # Sort and save dictionary by size and position
     surfaceMat = []
 
     for k in sorted(sizeDict.keys()):
         internalList = []
         for j in sorted(sizeDict[k].keys()):
-            internalList.append(sizeDict[k][j])
+            internalList.append(np.log(sizeDict[k][j] + 1))
         surfaceMat.append(list(internalList))
 
     return surfaceMat
@@ -274,15 +291,30 @@ def make3dPlot(surfaceMatrix, boundD):
     upstream = (float(args.e) / boundD['glen']) * 100
 
     # position in [] is x co-ord, position in [[]] is y co-ord, number is z co-ord
-    data = [go.Surface(z=surfaceMatrix)]
+    data = [go.Surface(
+        z=surfaceMatrix,
+        colorscale=[[0, 'rgb(255,255,255)'], [0.01, 'rgb(50,50,50)'], [0.45, 'rgb(178,223,138)'], [1, 'rgb(227,26,28)']],
+        contours=dict(
+            # x=dict(
+            #     show=True,
+            #     highlightwidth=1
+            # ),
+            # y=dict(
+            #     show=True,
+            #     highlightwidth=1
+            # )
+        ),
+        opacity=1
+    )]
+
     layout = go.Layout(
-        title=args.i,
+        title=str(args.i + args.B),
         autosize=True,
         width=1590,
         height=1000,
 
         scene=dict(
-            aspectratio=dict(x=3, y=1, z=1),
+            aspectratio=dict(x=4, y=2, z=1),
             aspectmode = 'manual',
             yaxis=dict(
                 title='Particle Size',
@@ -291,6 +323,8 @@ def make3dPlot(surfaceMatrix, boundD):
                     size=18,
                     #color='lightgrey'
                 ),
+                # log 50 and log 500. Christ knows why it wont let me log it in place...
+                range=[1.698970004,2.698970004],
                 type='log',
                 autorange=True,
             ),
@@ -301,16 +335,17 @@ def make3dPlot(surfaceMatrix, boundD):
                     size=31,
                     #color='lightgrey'
                 ),
-                #type='log',
                 #autorange=False,
                 ticks='inside',
                 showgrid=True,
                 ticktext=["-" + str(args.e),str(boundD['rangeStart'] + args.e), str(boundD['rangeEnd'] - args.e), "+" + str(args.e)],
                 tickvals=[0, upstream, (100 - upstream), 100]
-            )
-        )
+            ),
+            zaxis=dict(range=[4,10])
+        ),
+
     )
-    shapes = buildGeneModel()
+    #shapes = buildGeneModel()
 
     fig = go.Figure(data=data, layout=layout)
     outname = str(args.i) + "-3Dsurface.html"
@@ -328,7 +363,7 @@ def make2dHist(poslist, sizelist, boundD):
     data = go.Data([trace1])
 
     layout = go.Layout(
-        title=args.i,
+        title= str("Gene:" + args.g + "  |||| Inputs:" + args.i),
         autosize=True,
         width=1800,
         height=800,
@@ -354,49 +389,6 @@ def make2dHist(poslist, sizelist, boundD):
             )
         ),
         shapes = buildGeneModel()
-        # shapes = [
-        # {
-        #     'type': 'rect',
-        #     'x0': boundD['TSS'],'y0': 52.5,'x1': boundD['TTS'],'y1': 57.5,
-        #     'line': {'color': 'rgb(0,0,0)','width': 2},
-        #     'fillcolor': 'rgb(100,0,0)'
-        # },
-        # {
-        #     'type': 'rect',
-        #     'x0':3625475 ,'y0': 51,'x1':3625619 ,'y1': 59,
-        #     'line': {'color': 'rgb(0,0,0)','width': 2},
-        #     'fillcolor': 'rgb(000,0,0)'
-        # },
-        # {
-        #     'type': 'rect',
-        #     'x0':3625708 ,'y0': 51,'x1':3626294 ,'y1': 59,
-        #     'line': {'color': 'rgb(0,0,0)','width': 2},
-        #     'fillcolor': 'rgb(000,0,0)'
-        # },
-        # {
-        #     'type': 'rect',
-        #     'x0':3626387 ,'y0': 51,'x1':3626488 ,'y1': 59,
-        #     'line': {'color': 'rgb(0,0,0)','width': 2},
-        #     'fillcolor': 'rgb(000,0,0)'
-        # },
-        # {
-        #     'type': 'rect',
-        #     'x0':3626568 ,'y0': 51,'x1':3626938 ,'y1': 59,
-        #     'line': {'color': 'rgb(0,0,0)','width': 2},
-        #     'fillcolor': 'rgb(000,0,0)'
-        # },
-        # {
-        #     'type': 'rect',
-        #     'x0':3627100 ,'y0': 51,'x1':3627139 ,'y1': 59,
-        #     'line': {'color': 'rgb(0,0,0)','width': 2},
-        #     'fillcolor': 'rgb(000,0,0)'
-        # },
-        # {
-        #     'type': 'line',
-        #     'x0':boundD['rangeStart'] ,'y0': 60,'x1':boundD['rangeEnd'] ,'y1': 60,
-        #     'line': {'color': 'rgb(0,0,0)','width': 2}
-        # }
-        # ]
     )
 
     fig = go.Figure(data=data, layout=layout)
