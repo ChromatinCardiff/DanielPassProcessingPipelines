@@ -1,12 +1,13 @@
 
-Quickstart MNaseseq pipeline:
+<h2>Quickstart MNaseseq pipeline:</h2>
 ```
+# fastq to sgr or wig:
 bowtie -v 3 --maxins 5000 --fr -k 1  -p 12 --sam indexes/TAIR10 -1 infile_R1.fastq -2 infile_R2.fastq bowtie/infile.sam -t
 SAMparser2.pl -i infile.sam -o outdirectory -f HISEQ -p 80,150,350,500,680,860
-sgr_builder.pl -i infile_150.txt -o outfile.sgr -a 3
+sgr_builder.pl -i outdirectory/infile_150.txt -o outfile.sgr -a 3
 sgr2wig.pl input.sgr output.wig
 ```
-
+<hr>
 <h3>From FASTQ to SGR/WIG</h3>
 <b>Bowtie command</b>
 ```
