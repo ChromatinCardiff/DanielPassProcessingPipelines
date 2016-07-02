@@ -73,3 +73,12 @@ join -e '0' -o auto -a1 -a2 sort_uplist_GO.tsv sort_downlist_GO.tsv >updown_GO.t
 ```
 sort -u -t, -k1,1 file
 ```
+<b>Pull out isoforms, reheader and drop danpos leading cols</b>
+```
+for i in *xls;
+do 
+grep -f ~/Projects/AGM/RNAseq/cufflinks/isoforms/isoform_list.txt $i >tmp.txt;
+cat HEADER.txt tmp.txt >tmp2.txt;
+cut -f1,5- tmp2.txt >$i.cut;
+done
+```

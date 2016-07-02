@@ -1,5 +1,5 @@
 library("edgeR")
-setwd("~/Projects/ALD/RNAseq/ARA11/HTseq")
+setwd("~/Projects/AGM/RNAseq/ARA11/HTseq")
 
 samples <- read.table("samples_LD.txt", header=TRUE)
 

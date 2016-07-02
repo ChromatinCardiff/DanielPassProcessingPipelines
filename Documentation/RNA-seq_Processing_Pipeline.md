@@ -20,11 +20,22 @@ cuffcompare -s genome.fa -CG -R -V -r genes.gtf CL-annot/ES5_CLout-Gtest/ES5_CLo
 
 ```
 
-<h3>TSS prediction (aka pulling mapped primary isoform start sites)</h3>
+<h3>TSS isoform selection (aka pulling mapped primary isoform start sites)</h3>
 ```
-awk '{if ($3 ~ /transcript/) {print $0;} }' transcripts.gtf >allgenes.gtf         #Pull out transcripts only, ignore individual exons
-grep -v 'FPKM "0.0000000000"' allgenes.gtf >isoforms.gtf                          #Remove unexpressed lines
-awk '{if ($6 ~ /1000/) {print $0;} }' isoforms.gtf >primary-isoforms-only.gtf       #extract only primary isoform (having both would be useful in some cases)
+#Pull out transcripts only, ignore individual exons | Remove unexpressed lines | extract only primary isoform (having both would be useful in some cases)
+for i in AGM*/transcripts.gtf;
+do
+awk '{if ($3 ~/transcript/) {print $0;} }' $i | grep -v 'FPKM "0.0' | awk '{if ($6 ~ /1000/) {print $0;} }' >$i-primary.gtf;
+done
+
+# Grab basic list of genes
+for i in AGM*/*primary.gtf;
+do
+cut -f2 -d ';' AGM16/transcripts.gtf-primary.gtf | sed 's/ transcript_id "\(.*\)"/\1/' | grep 'AT' >$i-isoform_list.txt;
+done
+
+# Identify common isoforms between comparative samples
+for i in AG*; do rename "s/tran/$i-tran/" $i/tra*; done
 ```
 
 <h2>Annotating novel genome with RNAseq data</h2>
@@ -50,6 +61,15 @@ gffread WT_vs_g54_cuffcompare.combined.gtf -g ~/axon_scratch/REFS/Ler0_FJ.fa -w 
 blastn -query WT_vs_g54_cuffcompare.combined.fasta -db ~/db/nt-nuc -max_target_seqs 1 -outfmt 6 -evalue 1e-5 -num_threads 16 -out WT_vs_g54_cuffcompare.combined.blastn
 ```
 
+<h3>Make Coverage Chart for Genome Browser</h3>
+```
+for i in *bam; do bamToBed -i $i > $i.bed; done
+for i in *bam.bed; do genomeCoverageBed -i $i -bg -g ~/Projects/DansProcessingPipeline/scripts/core_scripts/Atha_chr_sizes.txt > $i.cov; done
+for i in *cov; do bedGraphToBigWig $i ~/Projects/DansProcessingPipeline/scripts/core_scripts/Atha_chr_sizes.txt $i.bigwig; done
+
+# Or cat and sort Bed files together to make one representative trace, then make bigwig
+cat ES1.bam.bed ES3.bam.bed ES5.bam.bed ES7.bam.bed | sort -k1,1 -k2,2 >ES-All_light.bed
+```
 
 <h3>Differential expression analysis with HTseq and EdgeR</h3>
 

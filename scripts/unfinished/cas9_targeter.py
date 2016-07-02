@@ -70,7 +70,7 @@ def main():
             t = targetDict[pos].complement()
             if re.match('^GG..{3}[A|T].{15}G', str(t)) is not None:
                 if re.search('N', str(t)) is not None:
-                    print '[NB: ambiguous bases present]'
+                    print '[NB: ambiguous bases present - ommited]'
                 else:
                     a = t[0:3], "|", t[3:23]
                     revDict[pos] = ' '.join(str(i) for i in a)
@@ -81,7 +81,7 @@ def main():
             for revpos in sorted(revDict.keys()):
                 spacer = (revpos + 3) - (fwdpos + 20)
                 if (spacer < 100) and (spacer > 5):
-                    outtable.write(' '.join((str(fwdpos).zfill(4),":", fwdDict[fwdpos], "--", str(spacer), "bp--", revDict[revpos], "\n")))
+                    outtable.write(' '.join((str(fwdpos).zfill(4),":", fwdDict[fwdpos], "--", str(spacer), "bp --", revDict[revpos], "\n")))
                     matchInt += 1
                     outfasta.write(''.join((">", str(i + matchInt) + "-forward | FwdPos:", str(fwdpos).zfill(4), "\n")))
                     outfasta.write(''.join((fwdDict[fwdpos][0:20], "\n")))
@@ -89,8 +89,9 @@ def main():
                     outfasta.write(''.join((revDict[revpos][6:26], "\n")))
 
     if args.B is True:
-        print "Running blastn for all generated sequences."
+        print "Running blastn for all generated sequences from", args.o + ".fasta"
         blastn_cline = NcbiblastnCommandline(query=args.o + ".fasta", db=args.d, outfmt=7, out=args.o + ".bln")
+        print blastn_cline
         stdout, stderr = blastn_cline()
 
     print "All done, see files:", args.o + "-table.txt,", args.o + ".fasta and", args.o + ".bln"

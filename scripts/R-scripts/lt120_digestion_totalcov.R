@@ -24,7 +24,7 @@ ref.std.melt <-melt(ref.std, id="pos")
 
   
 p1 <- ggplot(data=df.melt) +
-  stat_smooth(aes(x=pos, y=value, colour=variable), method="loess", span=0.1, se=FALSE) +
+  stat_smooth(aes(x=pos, y=value, colour=variable), method="loess", span=0.1, se=FALSE) 
   facet_grid(. ~ variable) +
   theme(legend.position = "none") + labs(title = "Total lt120 raw")
 
@@ -46,3 +46,11 @@ p4 <- ggplot(data=ref.std.melt) +
 
 multiplot(p1,p2,p3,p4)
 
+#Individual chart
+p2 <- ggplot(data=df.std.melt) +
+  stat_smooth(aes(x=pos, y=value, colour=variable), method="loess", span=0.1, se=FALSE) +
+  #facet_grid(. ~ variable) +
+  scale_x_continuous(breaks = pretty_breaks(n=12)) +
+  geom_vline(xintercept=0, colour="blue", linetype="longdash") +
+  theme(legend.position = "none") + labs(title = "Total lt120 standardized")
+p2

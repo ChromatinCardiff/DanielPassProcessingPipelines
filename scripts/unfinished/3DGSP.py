@@ -19,7 +19,7 @@ import plotly
 import plotly.graph_objs as go
 
 ## Define some parameters IF YOU WANT TO SAVE TYPING! ##
-SAMdir = "/home/sbi6dap/RawData/ALD/MNase-seq/SAMs/"
+SAMdir = "/home/sbi6dap/RawData/AGM/MNase/bowtie/Col0-mapped-Lers/"
 GTFFile = "/home/sbi6dap/Projects/REFDB/Araport11_genes.20151202.gtf"
 
 if __name__ == '__main__':
@@ -129,7 +129,7 @@ def defineRegions():
                         boundD['TTS'] = int(gline[3])
 
         print "Gene Boundaries:"
-        print boundD['chrom'],boundD['TSS'],boundD['TTS']
+        print boundD['chrom'],min(boundD['TSS'],boundD['TTS']),max(boundD['TSS'],boundD['TTS'])
 
     elif args.b is None and args.B is None:
         print "Exiting as no co-ordinates given provide a gene using -g"
@@ -148,9 +148,9 @@ def defineRegions():
         boundD['TSS'] = int(b2[0])
         boundD['TTS'] = int(b2[1])
 
-    boundD['glen'] = boundD['TSS'] - boundD['TTS']
-    boundD['rangeStart'] = boundD['TSS'] - args.e
-    boundD['rangeEnd'] = boundD['TTS'] + args.e
+    boundD['glen'] = int(boundD['TSS'] - boundD['TTS'])
+    boundD['rangeStart'] = min(boundD['TSS'],boundD['TTS']) - args.e
+    boundD['rangeEnd'] = max(boundD['TSS'],boundD['TTS']) + args.e
 
     return boundD
     #return(chrom,regionStart,regionEnd,regionLength)
@@ -168,6 +168,8 @@ def regionExtract(samfile,boundD):
             #print x, y
             y +=  args.r
         x += args.q
+
+    sizeDict[0][boundD['rangeStart']] = 10000
 
     for read in samfile.fetch(boundD['chrom'],boundD['rangeStart'],boundD['rangeEnd']):
         #pos = read.reference_start
@@ -199,8 +201,10 @@ def regionExtract(samfile,boundD):
     return surfaceMat
 
 def simpleExtract(globalX,globalY,samfile,boundD):
+    leftpoint = min(boundD['rangeStart'],boundD['rangeEnd'])
+    rightpoint = max(boundD['rangeStart'],boundD['rangeEnd'])
 
-    for read in samfile.fetch(boundD['chrom'],boundD['rangeStart'],boundD['rangeEnd']):
+    for read in samfile.fetch(boundD['chrom'],leftpoint,rightpoint):
         #pos = read.reference_start
         #size = abs(read.template_length)
 
@@ -308,7 +312,7 @@ def make3dPlot(surfaceMatrix, boundD):
     )]
 
     layout = go.Layout(
-        title=str(args.i + args.B),
+        title=str(args.i),
         autosize=True,
         width=1590,
         height=1000,
@@ -356,6 +360,8 @@ def make2dHist(poslist, sizelist, boundD):
     trace1 = go.Histogram2dContour(
         x=poslist,
         y=sizelist,
+        zmin=0,
+        zmax=10000,
         contours=dict(showlines=False),
         colorscale=[[0, 'rgb(255,255,255)'], [0.25, 'rgb(31,120,180)'], [0.45, 'rgb(178,223,138)'], [0.65, 'rgb(51,159,44)'], [0.85, 'rgb(251,154,153)'], [1, 'rgb(227,26,28)']],
     )
@@ -364,6 +370,7 @@ def make2dHist(poslist, sizelist, boundD):
 
     layout = go.Layout(
         title= str("Gene:" + args.g + "  |||| Inputs:" + args.i),
+        #title= str("Inputs:" + args.i),
         autosize=True,
         width=1800,
         height=800,

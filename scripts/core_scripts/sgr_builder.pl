@@ -47,6 +47,8 @@ if(exists $options{b}){
   my $bin_width = $options{b};
 }
 
+print "~~~~~~~~~~~~~~~~~~~~~~~\n";
+
 # Bin averaging
 my $binavg = 1;
 if(exists $options{a}){
@@ -62,12 +64,14 @@ if(exists $options{p}){
   open(PARA, '<', $parafile) or die "Unable to access Chromosome size parameter file: $parafile $!";
   chomp(@chrsize = <PARA>);
 }else{
-  print "Using Arabidopsis thaliana chromosomes as you didn't say otherwise!\n";
+  print "Using Arabidopsis thaliana chromosomes as you didn't say otherwise! If it sharts throwing \"Uninitialised Value\" errors, check that chomosome names are the same as in the reference file.\n";
   my $parafile = "/home/sbi6dap/Projects/DansProcessingPipeline/scripts/core_scripts/Atha_chr_sizes.txt";
   print "Loading chromosome sizes from $parafile\n";
   open(PARA, '<', $parafile) or die "Unable to access Chromosome size parameter file: $parafile $!";
   chomp(@chrsize = <PARA>);
 }
+
+print "~~~~~~~~~~~~~~~~~~~~~~~\n";
 
 ################
 # MAIN PROGRAM #
@@ -98,10 +102,9 @@ print "Calculating bin abundances\n";
 while(<IN>){
   # split line by delimiter and store elements in an array
   @line = split('\t',$_);
-  #print "$line[0]\tline[3]\t";
+  # Modify value into bin (10bp by default)
   my $bin = (int($line[3]/$bin_width))*$bin_width;
-  #print "$bin\n";
-  #print "Chr: $line[0]\tbin:$bin\tPos:$line[3]\n";
+  # Count into bins
   $binhash{$line[0]}{$bin} = $binhash{$line[0]}{$bin} + 1;
 }
 close(IN);
