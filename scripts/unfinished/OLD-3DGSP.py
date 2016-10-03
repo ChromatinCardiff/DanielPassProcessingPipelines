@@ -27,8 +27,8 @@ if __name__ == '__main__':
     parser.add_argument('-i', help='Input a Bam file or a list of comma-separated Bam files to merge (format: one.bam,two.bam,three.bam)')
     parser.add_argument('-d', default=SAMdir, help='Optional: Directory where bamfiles are (saves on typing!)')
     parser.add_argument('-o', help='Output prefix')
-    parser.add_argument('-b', help='Regions to extract (Bed file)')
-    parser.add_argument('-B', help='Individual set of co-ordinates in bed format (`Chr1:1000-1510`) (Requires surrounding quotes to escape semi-colon)')
+    parser.add_argument('-B', help='Individual set of co-ordinates in bed format (Chr1:1000-1510)')
+    parser.add_argument('-b', help='Multiple regions to extract and avaerage over (Bed file)')
     parser.add_argument('-g', help='Gene transcript to get positional information from | REQUIRES GTF FILE (-G)')
     parser.add_argument('-G', default=GTFFile, help='gtf file to get gene model information from | REQUIRES GENE/TRANSCRIPT ID')
     parser.add_argument('-e', default=500, type=int, help='Integer for upstream/downstream extension')
@@ -85,7 +85,7 @@ def main():
         make2dHist(globalX,globalY,boundD)
 
     elif args.p == "3D":
-        print "Currently broken for multiple input files. Only use one at a time"
+        print "Currently not able to take multiple input files. Only use one at a time"
         for samfile in sampleList:
             print "Processing samfile"
             surfaceMat = regionExtract(samfile, boundD)
@@ -112,27 +112,33 @@ def defineRegions():
         gtfFile = open(args.G, 'rb')
         gene = args.g
 
+        UTR5match = False
+        UTR3match = False
+
         for line in gtfFile:
             if re.search(gene, line):
-                if re.search("5UTR", line):
+                if UTR5match == False and re.search("5UTR", line):
                     gline = line.split('\t')
                     boundD['chrom'] = gline[0]
                     if gline[6] == "+":
                         boundD['TSS'] = int(gline[3])
                     else:
                         boundD['TSS'] = int(gline[4])
-                if re.search("3UTR", line):
+                    UTR5match = True
+
+                if UTR3match == False and re.search("3UTR", line):
                     gline = line.split('\t')
                     if gline[6] == "+":
                         boundD['TTS'] = int(gline[4])
                     else:
                         boundD['TTS'] = int(gline[3])
+                    UTR3match = True
 
         print "Gene Boundaries:"
         print boundD['chrom'],min(boundD['TSS'],boundD['TTS']),max(boundD['TSS'],boundD['TTS'])
 
     elif args.b is None and args.B is None:
-        print "Exiting as no co-ordinates given provide a gene using -g"
+        print "Exiting as no co-ordinates given. Provide a gene using -g"
         quit()
 
     elif args.b is not None:
@@ -205,9 +211,6 @@ def simpleExtract(globalX,globalY,samfile,boundD):
     rightpoint = max(boundD['rangeStart'],boundD['rangeEnd'])
 
     for read in samfile.fetch(boundD['chrom'],leftpoint,rightpoint):
-        #pos = read.reference_start
-        #size = abs(read.template_length)
-
         pos = (int(read.reference_start / args.r)) * args.r
         size = (int(abs(read.template_length) / args.q)) * args.q
 
@@ -219,6 +222,8 @@ def simpleExtract(globalX,globalY,samfile,boundD):
     #return (m1,m2)
 
 def kdeTransform(poslist,sizelist):
+    #### ---- Currently unused ---- ####
+
     #data=numpy.random.multivariate_normal(mu,surfaceMat,1000)
     #values = data.T
     #kde = stats.gaussian_kde(values)
@@ -357,6 +362,20 @@ def make3dPlot(surfaceMatrix, boundD):
 
 def make2dHist(poslist, sizelist, boundD):
 
+    if args.g:
+        geneModel = buildGeneModel()
+        chartTitle = str("Gene:" + args.g + "  |||| Inputs:" + args.i),
+    else:
+        geneModel = []
+        geneModel.insert(0,
+            {
+            'type': 'rect',
+            'x0':min(poslist) ,'y0': 52.5,'x1':max(poslist) ,'y1': 55,
+            'fillcolor': 'rgb(100,100,100)'
+            })
+        chartTitle = str("Inputs:" + args.i),
+
+
     trace1 = go.Histogram2dContour(
         x=poslist,
         y=sizelist,
@@ -369,8 +388,7 @@ def make2dHist(poslist, sizelist, boundD):
     data = go.Data([trace1])
 
     layout = go.Layout(
-        title= str("Gene:" + args.g + "  |||| Inputs:" + args.i),
-        #title= str("Inputs:" + args.i),
+        title=chartTitle,
         autosize=True,
         width=1800,
         height=800,
@@ -395,7 +413,7 @@ def make2dHist(poslist, sizelist, boundD):
                 #color='lightgrey'
             )
         ),
-        shapes = buildGeneModel()
+        shapes = geneModel
     )
 
     fig = go.Figure(data=data, layout=layout)
