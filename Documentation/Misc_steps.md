@@ -69,6 +69,11 @@ bedtools coverage -hist -abam samp.01.bam -b target_regions.bed | grep ^all > sa
 join -e '0' -o auto -a1 -a2 sort_uplist_GO.tsv sort_downlist_GO.tsv >updown_GO.tsv
 ```
 
+<b>merge two files and numerically add (sum) a column</b>
+```
+paste -d+ <(cut -f5 prinegWT_tcv1.txt) <(cut -f5 prinegWT_tcv2.txt) | bc | paste <(cut -f1-4 prinegWT_tcv1.txt) - >tmp.txt
+```
+
 <b>Sort by first column only (-u uniq, -t delimiter, -k1,1 key field is col1)</b>
 ```
 sort -u -t, -k1,1 file
@@ -76,9 +81,13 @@ sort -u -t, -k1,1 file
 <b>Pull out isoforms, reheader and drop danpos leading cols</b>
 ```
 for i in *xls;
-do 
+do
 grep -f ~/Projects/AGM/RNAseq/cufflinks/isoforms/isoform_list.txt $i >tmp.txt;
 cat HEADER.txt tmp.txt >tmp2.txt;
 cut -f1,5- tmp2.txt >$i.cut;
 done
 ```
+
+<b>Subtract one wig from the other</b>
+paste sample1.wig sample2.wig >tmp.wig
+awk '{a=$1-$2; print a,"TABCHARACTER",$0}' tmp.wig | sed 's/^0\s\+fix/fix/' | cut -f1 >samples_sub.wig
