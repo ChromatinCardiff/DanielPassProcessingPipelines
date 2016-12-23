@@ -20,8 +20,14 @@ x <- read.table("/home/sbi6dap/Projects/AWT/wigs/tcv/AtN_tcv_10kb.sgr", sep="\t"
 #x <- read.table("/home/sbi6dap/Projects/NON-ATHAL/Yeast/prinegWT_tcv_1kb.sgr", sep="\t")
 #x <- read.table("/home/sbi6dap/Projects/NON-ATHAL/Yeast/nDNA_tcv_1kb.sgr", sep="\t")
 
-colnames(x) <- c("chrom", "pos", "value")
+# gene density data # 
+y <- read.table("/home/sbi6dap/Projects/REFDB/ARA_genedensity_10kb.txt", sep="\t")
+
 head(x)
+head(y)
+xy <- cbind(x,y)
+
+colnames(x) <- c("chrom", "pos", "value")
 
 # Not needed if reading sgr
 #x.melt <- melt(x, id="pos")

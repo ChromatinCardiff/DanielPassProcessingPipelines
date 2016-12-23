@@ -91,3 +91,14 @@ done
 <b>Subtract one wig from the other</b>
 paste sample1.wig sample2.wig >tmp.wig
 awk '{a=$1-$2; print a,"TABCHARACTER",$0}' tmp.wig | sed 's/^0\s\+fix/fix/' | cut -f1 >samples_sub.wig
+
+<b>Using Homer to find TFBS locations</b>
+```
+# Create Motif file
+seq2profile.pl <consensus> [# mismatches] [name] > output.motif
+i.e. seq2profile.pl GGAAGT 0 ets > output.motif
+
+# Find motif in genome
+scanMotifGenomeWide.pl <file.motif> <genome.fasta> [-bed] > output.bed
+scanMotifGenomeWide.pl TFBS/SORLREP2.motif TAIR10_Chr.all.fasta -bed >TFBS/SORLREP2.bed
+```

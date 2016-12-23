@@ -1,8 +1,10 @@
 #!/usr/bin/python
 
-###################################################
-## Daniel Pass | github.com/passdan | March 2016 ##
-###################################################
+#################################################
+## Daniel Pass | github.com/passdan | Nov 2016 ##
+#################################################
+
+# Still under development! Keep an eye out for updates! #
 
 # Basic processing
 import argparse
@@ -22,7 +24,7 @@ import plotly.graph_objs as go
 
 ## Define some parameters IF YOU WANT TO SAVE TYPING! ##
 SAMdir = "/home/sbi6dap/RawData/ALD/MNase-seq/BAMs/"
-GTFFile = "/home/sbi6dap/Projects/REFDB/Araport11_genes.20151202.gtf"
+GTFFile = "/home/sbi6dap/Projects/REFDB/Araport11_GFF3_genes_transposons.201606.gtf"
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Import Bam file and extract defined region for 2D or 3D plotting')
@@ -108,7 +110,11 @@ def main():
         make2dHist(globalX,globalY,bCount)
 
     elif args.p == "3D":
-        print "Currently not able to take multiple input files. Only use one at a time"
+        if len(samlist) >1:
+            print "Currently not able to take multiple input files. Only use one at a time"
+
+        boundD = defineRegions()
+
         for samfile in sampleList:
             print "Processing samfile"
             surfaceMat = regionExtract(samfile, boundD)
@@ -183,11 +189,9 @@ def defineRegions():
     boundD['rangeEnd'] = max(boundD['TSS'],boundD['TTS']) + args.e
 
     return boundD
-    #return(chrom,regionStart,regionEnd,regionLength)
 
 def regionExtract(samfile,boundD):
 
-    #sizeDict = {}
     sizeDict = defaultdict(dict)
 
     x = 0
@@ -247,7 +251,10 @@ def multiRegionSimpleExtract(globalX,globalY,samfile):
     print "Reading bedfile"
     with open(args.b, 'rb') as f:
         for line in f:
-            b1 = line.split(':')
+            # take just first block before tab incase bed is followed by other annotation e.g. strand info
+            bed0 = line.split('\t')
+            # Chrom data
+            b1 = bed0[0].split(':')
             chrom = b1[0]
             b2 = b1[1].split('-')
             midpoint = (int((int(b2[0]) + int(b2[1])) / 2) / args.r) * args.r
@@ -327,6 +334,8 @@ def make3dPlot(surfaceMatrix, boundD):
     # position in [] is x co-ord, position in [[]] is y co-ord, number is z co-ord
     data = [go.Surface(
         z=surfaceMatrix,
+        zmin=0,
+        zmax=5,
         colorscale=[[0, 'rgb(255,255,255)'], [0.01, 'rgb(50,50,50)'], [0.45, 'rgb(178,223,138)'], [1, 'rgb(227,26,28)']],
         contours=dict(
             # x=dict(
@@ -375,7 +384,7 @@ def make3dPlot(surfaceMatrix, boundD):
                 ticktext=["-" + str(args.e),str(boundD['rangeStart'] + args.e), str(boundD['rangeEnd'] - args.e), "+" + str(args.e)],
                 tickvals=[0, upstream, (100 - upstream), 100]
             ),
-            zaxis=dict(range=[4,10])
+            #zaxis=dict(range=[0,10])
         ),
 
     )

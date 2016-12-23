@@ -19,7 +19,8 @@ ETS <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks-RNA-guided/me
 gene <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks-RNA-guided/median/median_profile_gene.xls", header=TRUE, sep="\t")
 
 #other
-TSSA <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks-RNA-guided/mean_ARA11/mean_CSS.xls", header=TRUE, sep="\t", row.names=1)
+TSSA <- read.table("/home/sbi6dap/Cell_vs_shoot.txt", header=TRUE, sep=",", row.names=1)
+TSSA <- read.table("/home/sbi6dap/Projects/AGM/MNaseseq/Col0/particles/ALL/mean_150_TSS-WT-highlow.xls", header=TRUE, sep=",", row.names=1)
 TSST <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks-RNA-guided/mean_TAIR/mean_profile_CSS.xls", header=TRUE, sep="\t", row.names=1)
 
 #tmp
@@ -28,6 +29,12 @@ tmp <- read.table("/home/sbi6dap/Projects/ALD/totalcoverage/mean_ESS_heatmap/LDc
 # Annotations
 Exposure <- c("Light","Light","Dark","Dark","Light","Light","Dark","Dark")
 Treatment <- c("Low","High","Low","High","Low","High","Low","High")
+type <- c("cell","cell","cell","cell","cell","cell","cell","cell","shoot","shoot","shoot","shoot","shoot","shoot")
+type <- c("WT","WT","WT","E2FC-KO","E2FC-KO","E2FC-KO")
+type <- c("WT","WT","WT","CYCD3;1-OE","CYCD3;1-OE","CYCD3;1-OE")
+type <- c("WT-Low","WT-High","WT-Low","WT-High","WT-Low","WT-High","WT-Ler","WT-Ler","WT-Ler")
+Digest <- c("Low","High","Low","High","Low","High","Low","Low","Low")
+
 
 ############### TSS ###############
 
@@ -35,7 +42,9 @@ TSSA.dec <- as.data.frame(decostand(t(TSSA), 'standardize', MARGIN=1))
 Annot <- c("ARA","ARA","ARA","ARA","ARA","ARA","ARA","ARA")
 TSSA.dec$pos <- rownames(TSSA.dec)
 TSSA.dec = cbind(Exposure,Treatment,Annot,TSSA.dec)
+TSSA.dec = cbind(type,Digest,TSSA.dec)
 TSSA.melt <- melt(TSSA.dec, id=c("pos","Exposure","Treatment", "Annot"))
+TSSA.melt <- melt(TSSA.dec, id=c("pos","type","Digest"))
 
 TSST.dec <- as.data.frame(decostand(t(TSST), 'standardize', MARGIN=1))
 Annot <- c("TAIR","TAIR","TAIR","TAIR","TAIR","TAIR","TAIR","TAIR")
@@ -49,15 +58,16 @@ ESSall.melt <- rbind(ESST.melt,ESSA.melt)
 
 # Chart all columns
 p <-ggplot(data=TSSA.melt, aes(x=as.numeric(as.character(variable)), y=value, colour=Exposure, lty=Annot))
+p <-ggplot(data=TSSA.melt, aes(x=as.numeric(as.character(variable)), y=value, colour=type, lty=Digest))
 TSS.plot <-p +
-  stat_smooth(method="loess", span=0.01, se=FALSE) + 
+  stat_smooth(method="loess", span=0.01, se=FALSE) +
   #geom_line(aes(x=as.numeric(as.character(variable)), y=value))+#, colour=Exposure)) +
   scale_x_continuous(breaks = pretty_breaks(n=12)) +
   #scale_colour_brewer(palette="Paired") +
   geom_vline(x=0, colour="blue", lty=2) +
   #scale_y_continuous(limits=c(-3.5, 3.5)) +
   theme(legend.position = "bottom") +
-  labs(title = "TSS") +
+  labs(title = "TSS") 
   facet_wrap(~ Treatment, ncol=1)
 TSS.plot
 ############### TTS ###############
