@@ -32,31 +32,51 @@ def main():
 
     outfile = open(args.o, 'w')
 
-    sumwig = []
+    mergewig = []
     fileinc = 0
+    lineinc = 0
 
     for file in sampleList:
         lineinc = 0
         for line in file:
             if re.match('fix', line):
                 if fileinc == 0:
-                    sumwig.append(line)
+                    mergewig.append(line)
             else:
                 if line.strip():
                     value = float(line)
                 if fileinc == 0:
-                    sumwig.append(value)
+                    mergewig.append(value)
                 else:
-                    sumwig[lineinc] = sumwig[lineinc] + value
+                    if args.m == "add":
+                        mergewig[lineinc] = float(mergewig[lineinc]) + value
+                    elif args.m == "subtract":
+                        subval = mergewig[lineinc] - value
+                        if subval > 0:
+                            mergewig[lineinc] = subval
+                        else:
+                            mergewig[lineinc] = 0
+                    elif args.m == "subtractSquared":
+                        subval = mergewig[lineinc] - value * value
+                        if subval > 0:
+                            mergewig[lineinc] = subval
+                        else:
+                            mergewig[lineinc] = 0
+                    elif args.m == "mean":
+                        mergewig[lineinc] = float(mergewig[lineinc]) + value
+
             lineinc += 1
 
         fileinc += 1
 
-    for line in sumwig:
+    for line in mergewig:
         if re.match('fix', str(line)):
             outfile.write(''.join(line + "\n"))
         else:
-            outfile.write(''.join((str(float(line) / float(fileinc))+"\n")))
+            if args.m == "add" or args.m == "subtract":
+                outfile.write(''.join((str(float(line))+"\n")))
+            if args.m == "mean":
+                outfile.write(''.join((str(float(line) / float(fileinc))+"\n")))
 
 def updateHeadLine(line):
     splitLine = line.split(' ')

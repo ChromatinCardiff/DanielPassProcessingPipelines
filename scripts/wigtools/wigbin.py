@@ -13,7 +13,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='change interval size for wigfile')
     parser.add_argument('-i', help='inputfile')
     parser.add_argument('-o', help='outputfile')
-    parser.add_argument('-n', help='number of intervals to merge together (average by mean)')
+    parser.add_argument('-n', help='number of intervals to bin together (average by mean)')
     args = parser.parse_args()
 
 def main():
@@ -43,7 +43,7 @@ def main():
                 averageCounter = 0
 
 def updateHeadLine(line):
-    splitLine = re.split(' |=', line)
+    splitLine = re.split(' +|=', line)
     newInterval = int(args.n) * int(splitLine[6])
     splitLine[6] = newInterval
     splitLine[8] = newInterval

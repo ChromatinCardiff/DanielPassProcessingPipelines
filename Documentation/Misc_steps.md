@@ -102,3 +102,7 @@ i.e. seq2profile.pl GGAAGT 0 ets > output.motif
 scanMotifGenomeWide.pl <file.motif> <genome.fasta> [-bed] > output.bed
 scanMotifGenomeWide.pl TFBS/SORLREP2.motif TAIR10_Chr.all.fasta -bed >TFBS/SORLREP2.bed
 ```
+
+# Convert file from Athamap into 10bp width bed:
+awk '{$98 = $4-5; $99 = $4+5; print $1 ":" $98 "-" $99}' Athamap-PIF5.txt | sed 's/At\(.\).*:/Chr\1:/' > AthamapPIF5.bed
+## Note: Clean up first and last lines!
