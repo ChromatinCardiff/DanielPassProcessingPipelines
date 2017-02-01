@@ -1,0 +1,35 @@
+
+# Peak detection with mnase
+
+
+# Build background noise estimate
+
+## One tag per position
+macs2 filterdup -i ~/RawData/ALD/MNase-seq/120bp_split/bedpe/ES09_lt120_bedpe.bed --keep-dup=1 -o backgrounds/ES09_filterdup.bed
+
+## Estimate noise
+macs2 pileup -i ES09_filterdup.bed -B --extsize 60 -o ES09_d_bg.bdg
+macs2 pileup -i ES09_filterdup.bed -B --extsize 500 -o ES09_1k_bg.bdg
+macs2 pileup -i ES09_filterdup.bed -B --extsize 5000 -o ES09_10k_bg.bdg
+
+## Normalise (-p is (size of tag)/(length of norm region))
+macs2 bdgopt -i ES09_1k_bg.bdg -m multiply -p 0.1 -o ES09_1k_bgnorm.bdg
+macs2 bdgopt -i ES09_10k_bg.bdg -m multiply -p 0.01 -o ES09_10k_bgnorm.bdg
+macs2 cmbreps -m max -i ES09_1k_bgnorm.bdg ES09_10k_bgnorm.bdg -o ES09_1k10k_bgnorm.bdg
+macs2 cmbreps -m max -i ES09_d_bg.bdg ES09_1k10k_bgnorm.bdg -o ES09_background.bdg
+    ## Could add 'genome background' here but mnase seems too noisy already so left it out
+
+# Call peaks from bedgraph minus 10kb background
+macs2 bdgcmp -t ../ES09_bgsub.bedgraph -c ES09_background.bdg -m ppois -o ES09_pvalue.bdg
+macs2 bdgpeakcall -i ES09_pvalue.bdg -c 0.1 -l 60 -g 30 -o ES09_pvalue_peaks_01.bed
+# To limit peaks to certain width
+awk '{if (($3 - $2) < 300) print $0}' ES09_pvalue_peaks_01.bed >ES09_narrowpeaks.bed
+
+
+# To put into IGV need to do this:
+cut -f1-4 ES09_narrowpeaks.bed | tail -n +2 >ES09_IGV.bed
+
+# Distance to nearest ... (Here five_prime_UTR)
+for i in {09..16}; do closest-features --closest --dist peaks/ES${i}_IGV.bed ~/Projects/REFDB/Araport11_GFF3_genes_transposons.five_prime_UTR.bed > annotations/ES${i}_closest-5UTR.bed; done
+# Count number within +/- 150bp
+for i in {09..16}; do  cut -f3 -d'|' annotations/ES${i}_closest-5UTR.bed | awk '{ if ($1 >= -150 && $1 <= 150) print $0}'  | grep -wc 0; done
