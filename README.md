@@ -9,7 +9,8 @@
 
 Otherwise jump into the scripts folders of:
 
-* Core scripts: Things that are completed and have posix or flag based input (like a real program!)
+* Core scripts: Things that are completed and have posix or flag based input 
+
 * R-scripts: Often environment-specific processing and charting mid-length scripts. Probably not too helpful without my explaining them.
 * General Tidbits: Helpful parts and notes
 * Unfinished: Scripts that are still in progress, or have been paused for a later date. Would not recommend.
