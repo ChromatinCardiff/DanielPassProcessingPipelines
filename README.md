@@ -10,7 +10,7 @@
 Otherwise jump into the scripts folders of:
 
 * Core scripts: Things that are completed and have posix or flag based input 
- * [BAM2SizePlot.py]https://github.com/ChromatinCardiff/ALD is the package for 3D plotting size differentiateing chromatin accessibility data.
+ * [BAM2SizePlot.py](https://github.com/ChromatinCardiff/ALD) is the package for 3D plotting size differentiateing chromatin accessibility data.
 
 * R-scripts: Often esoteric and environment-specific processing and charting mid-length scripts, ask if explanation needed.
 * General Tidbits: Helpful oneliners and notes
