@@ -31,6 +31,7 @@ if __name__ == '__main__':
     parser.add_argument('-o', help='Output prefix')
     parser.add_argument('-B', help='One individual set of co-ordinates in bed format (Chr1:1000-1510)')
     parser.add_argument('-b', default=False, help='Bed file of regions to extract (Bed file)')
+    parser.add_argument('-a', default='mid', help='which end to align the beds on? [options: mid, 5, 3] default: mid')
     parser.add_argument('-g', help='Gene transcript to get positional information from | REQUIRES GTF FILE (-G)')
     parser.add_argument('-G', default=GTFFile, help='gtf file to get gene model information from | REQUIRES GENE/TRANSCRIPT ID')
     parser.add_argument('-e', default=500, type=int, help='Integer for upstream/downstream extension')
@@ -259,8 +260,16 @@ def multiRegionSimpleExtract(globalX,globalY,samfile):
             b1 = bed0[0].split(':')
             chrom = b1[0]
             b2 = b1[1].split('-')
-            midpoint = (int((int(b2[0]) + int(b2[1])) / 2) / args.r) * args.r
-            regionRange = [midpoint - args.e, midpoint + args.e]
+
+            # align point for bed file input
+            if (args.a == 'mid'):
+                point = (int((int(b2[0]) + int(b2[1])) / 2) / args.r) * args.r
+            if (args.a == '5'):
+                point = (int(int(b2[0])) / args.r) * args.r
+            if (args.a == '3'):
+                point = (int(int(b2[1])) / args.r) * args.r
+
+            regionRange = [point - args.e, point + args.e]
 
             for read in samfile.fetch(chrom,regionRange[0],regionRange[1]):
                 if (abs(read.template_length) > args.s) and (abs(read.template_length) < args.S):
@@ -270,7 +279,7 @@ def multiRegionSimpleExtract(globalX,globalY,samfile):
                     size = (int(abs(read.template_length) / args.q)) * args.q
 
                     while pos <= read.reference_end:
-                        globalX.append(pos - midpoint)
+                        globalX.append(pos - point)
                         globalY.append(size)
                         pos += args.r
 

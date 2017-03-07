@@ -76,6 +76,14 @@ cat ES1.bam.bed ES3.bam.bed ES5.bam.bed ES7.bam.bed | sort -k1,1 -k2,2 >ES-All_l
 HTSeq, repeat for each sample
 ```
 htseq-count -f 'bam' -s no -a 10 /home/GROUP-smbpk/sbi6dap/working/RNA-seq/working/ARA11/tophat/ES1_THout/accepted_hits.bam /home/GROUP-smbpk/sbi6dap/working/RNA-seq/Ath_ref_files/ARA11/Araport11_genes.20150701.gtf > /home/GROUP-smbpk/sbi6dap/working/RNA-seq/working/ARA11/HTSeq_out/ES1.count
+
+# Make single table in bash rather than touching R
+cut -f1 tri1.count > all_tri.count
+for i in tri*count
+ do
+  paste all_tri.count <(cut -f2 $i) > tmp.txt
+  mv tmp.txt all_tri.count
+ done
 ```
 EdgeR
 ```
