@@ -25,24 +25,6 @@ plus1_slider.pl -i ES10_150.Fnor.smooth.wig.heatmap.xls -o ES10_150-1nucl-align
 plus1_slider.pl -i ES10_150.Fnor.smooth.wig.heatmap.xls -o ES10_150-1nucl-align -X 		#create file
 plus1_slider.pl -i ES10_80.Fnor.smooth.wig.heatmap.xls -o ES10_80-1nucl-align -s ES10_150-1nucl-align-shift.txt  #use file instead of denovo calculations
 ```
-<h3> Total Coverage processing</h3>
-<b>convert total mapped bam into paired-end bed file (coverage including gap between pairs), cut out relevant columns and sort
-```
-samtools view -bf 0x2 ES09.bam | bamToBed -i stdin -bedpe | cut -f1,2,6 | sort -k1,1 -k2,2n >ES09_bedpe.txt
-```
-<b>Calculate coverage of regions then contract into 10bp bins</b>
-```
-coverageBed -a chromosomes.bed -b ES09_bedpe.bed -d >ES09_totalcov.txt
-cut -f1,4,5 ES09_totalcov.txt > ES09_totalcov_cut.txt
-data_binner.pl -i ES09_totalcov_cut.txt -o ES09_totalcov.sgr -b 10 -m AVG
-```
-
-```
-#Remove splice variant number from rownames
-for i in *DGE.xls; do sed 's/^\(AT.......\)\.[0-9]\+/\1/' $i >$i-gene; done
-#Remove splice variant number from rownames AND duplicate row names
-for i in *xls; do sed 's/^\(AT.......\)\.[0-9]\+/\1/' $i | awk '!seen[$1]++' >$i.cut; done
-```
 
 <b>Extract fasta sequence from a genome (bed format: chr \t start \t end). Can use gff instead of bed with same -bed flag.</b>
 ```
@@ -89,12 +71,14 @@ done
 ```
 
 <b>Subtract one wig from the other</b>
+```
 paste sample1.wig sample2.wig >tmp.wig
 awk '{a=$1-$2; print a,"TABCHARACTER",$0}' tmp.wig | sed 's/^0\s\+fix/fix/' | cut -f1 >samples_sub.wig
 
 <b>Using Homer to find TFBS locations</b>
 ```
 # Create Motif file
+```
 seq2profile.pl <consensus> [# mismatches] [name] > output.motif
 i.e. seq2profile.pl GGAAGT 0 ets > output.motif
 
@@ -104,5 +88,7 @@ scanMotifGenomeWide.pl TFBS/SORLREP2.motif TAIR10_Chr.all.fasta -bed >TFBS/SORLR
 ```
 
 # Convert file from Athamap into 10bp width bed:
+```
 awk '{$98 = $4-5; $99 = $4+5; print $1 ":" $98 "-" $99}' Athamap-PIF5.txt | sed 's/At\(.\).*:/Chr\1:/' > AthamapPIF5.bed
 ## Note: Clean up first and last lines!
+```
