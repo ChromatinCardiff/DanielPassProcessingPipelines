@@ -38,7 +38,7 @@ if __name__ == '__main__':
     parser.add_argument('-s', default=50, type=int, help='Minimum size of particle')
     parser.add_argument('-S', default=1000, type=int, help='Maximum size of particle')
     parser.add_argument('-q', default=10, type=int, help='Integer for rounding counts (fragment size, default: 10)')
-    parser.add_argument('-r', default=10, type=int, help='Integer for rounding counts (bases, default: 50)')
+    parser.add_argument('-r', default=10, type=int, help='Integer for rounding counts (bases, default: 10)')
     parser.add_argument('-p', default="2D", help='Choose plot type (2D or 3D, default:2D)')
     parser.add_argument('-z', default=1000, help='Change zmax for plot (Mainly to look at low abundance things) (Default 1000, \'None\' allows dynamic assignment)')
     parser.add_argument('-t', action='store_true', help='Use default co-ordinates for testing')

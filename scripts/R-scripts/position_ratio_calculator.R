@@ -4,7 +4,7 @@ library(scales)
 library(vegan)
 
 
-setwd("~/Projects/ALD/totalcoverage/mean_CSS_heatmap")
+setwd("~/Projects/ALD/z/mean_CSS_heatmap")
 
 ES09 <- read.table("ES09_totalcov.xls.cut", header=TRUE, sep="\t", row.names=1, check.names = FALSE)
 ES10 <- read.table("ES10_totalcov.xls.cut", header=TRUE, sep="\t", row.names=1)

@@ -2,7 +2,7 @@ Some of the stages and commands I've been using. Not complete.
 Lots of information can be found in http://www.nature.com/nprot/journal/v7/n3/full/nprot.2012.016.html
 
 <h3>Mapping with Tophat</h3>
-Get genome fasta and gff from https://www.ncbi.nlm.nih.gov/genome/ or similar, and turn gff into gtf with ```gffread file.gff -T -o file.gtf```. Or get gtf straight away, that'd work too.
+Get genome fasta and gff from https://www.ncbi.nlm.nih.gov/genome/ or similar, and turn gff into gtf with `gffread file.gff -T -o file.gtf`. Or get gtf straight away, that'd work too.
 ```
 /home/GROUP-smbpk/sbi6dap/localbin/tophat2 -p 32 -G /home/GROUP-smbpk/sbi6dap/working/RNA-seq/working/genes.gtf -o ES20_THout /home/GROUP-smbpk/sbi6dap/working/RNA-seq/working/genome fastqs/ES20_R1.fastq fastqs/ES20_R2.fastq
 ```
