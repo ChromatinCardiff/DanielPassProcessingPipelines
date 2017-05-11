@@ -2,17 +2,20 @@ Some of the stages and commands I've been using. Not complete.
 Lots of information can be found in http://www.nature.com/nprot/journal/v7/n3/full/nprot.2012.016.html
 
 <h3>Mapping with Tophat</h3>
+Get genome fasta and gff from https://www.ncbi.nlm.nih.gov/genome/ or similar, and turn gff into gtf with `gffread file.gff -T -o file.gtf`. Or get gtf straight away, that'd work too.
 
 ```
 /home/GROUP-smbpk/sbi6dap/localbin/tophat2 -p 32 -G /home/GROUP-smbpk/sbi6dap/working/RNA-seq/working/genes.gtf -o ES20_THout /home/GROUP-smbpk/sbi6dap/working/RNA-seq/working/genome fastqs/ES20_R1.fastq fastqs/ES20_R2.fastq
 ```
 
 <h3>Transcriptome analysis cufflinks</h3>
+
 ```
 /home/GROUP-smbpk/sbi6dap/localbin/cufflinks -g /home/GROUP-smbpk/sbi6dap/working/RNA-seq/working/genes.gtf -b /home/GROUP-smbpk/sbi6dap/working/RNA-seq/working/genome.fa -p 32 -o /home/GROUP-smbpk/sbi6dap/working/RNA-seq/working/CL-annot/ES8_CLout /home/GROUP-smbpk/sbi6dap/working/RNA-seq/working/TH/ES8_THout/accepted_hits_ES8.bam
 ```
 
 <h4>Create reference gtf</h4>
+
 ```
 cuffcompare -s genome.fa -CG -R -V -r genes.gtf CL-annot/ES5_CLout-Gtest/ES5_CLout-Gtest-transcripts.gtf CL-annot/ES2_CLout-Gtest/ES2_CLout-Gtest-transcripts.gtf CL-annot/ES6_CLout-Gtest/ES6_CLout-Gtest-transcripts.gtf CL-annot/ES3_CLout-Gtest/ES3_CLout-Gtest-transcripts.gtf CL-annot/ES7_CLout-Gtest/ES7_CLout-Gtest-transcripts.gtf CL-annot/ES1_CLout-Gtest/ES1_CLout-Gtest-transcripts.gtf CL-annot/ES4_CLout-Gtest/ES4_CLout-Gtest-transcripts.gtf CL-annot/ES8_CLout-Gtest/ES8_CLout-Gtest-transcripts.gtf
 
@@ -21,6 +24,7 @@ cuffcompare -s genome.fa -CG -R -V -r genes.gtf CL-annot/ES5_CLout-Gtest/ES5_CLo
 ```
 
 <h3>TSS isoform selection (aka pulling mapped primary isoform start sites)</h3>
+
 ```
 #Pull out transcripts only, ignore individual exons | Remove unexpressed lines | extract only primary isoform (having both would be useful in some cases)
 for i in AGM*/transcripts.gtf;
@@ -74,6 +78,7 @@ cat ES1.bam.bed ES3.bam.bed ES5.bam.bed ES7.bam.bed | sort -k1,1 -k2,2 >ES-All_l
 <h3>Differential expression analysis with HTseq and EdgeR</h3>
 
 HTSeq, repeat for each sample
+
 ```
 htseq-count -f 'bam' -s no -a 10 /home/GROUP-smbpk/sbi6dap/working/RNA-seq/working/ARA11/tophat/ES1_THout/accepted_hits.bam /home/GROUP-smbpk/sbi6dap/working/RNA-seq/Ath_ref_files/ARA11/Araport11_genes.20150701.gtf > /home/GROUP-smbpk/sbi6dap/working/RNA-seq/working/ARA11/HTSeq_out/ES1.count
 
@@ -86,6 +91,7 @@ for i in tri*count
  done
 ```
 EdgeR
+
 ```
 #source("http://bioconductor.org/biocLite.R")
 #biocLite("edgeR")
