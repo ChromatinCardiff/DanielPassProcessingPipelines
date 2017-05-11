@@ -66,6 +66,7 @@ blastn -query WT_vs_g54_cuffcompare.combined.fasta -db ~/db/nt-nuc -max_target_s
 ```
 
 <h3>Make Coverage Chart for Genome Browser</h3>
+
 ```
 for i in *bam; do bamToBed -i $i > $i.bed; done
 for i in *bam.bed; do genomeCoverageBed -i $i -bg -g ~/Projects/DansProcessingPipeline/scripts/core_scripts/Atha_chr_sizes.txt > $i.cov; done
