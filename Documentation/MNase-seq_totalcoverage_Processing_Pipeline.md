@@ -28,6 +28,6 @@ for i in *xls; do sed 's/^\(AT.......\)../\1/' $i | awk '!seen[$1]++' >$i.cut; d
 # Run 2D vis for subNSP at TFBS
 
 ```
-~/Projects/DansProcessingPipeline/scripts/core_scripts/BAM2SizePlot.py -i ES09.bam,ES13.bam -b ../REFDB/TFBS/PIF4.bed -S 100 -z None -q 1 -e 150
-~/Projects/DansProcessingPipeline/scripts/core_scripts/BAM2SizePlot.py -i ES11.bam,ES15.bam -b ../REFDB/TFBS/PIF4.bed -S 100 -z None -q 1 -e 150
+BAM2SizePlot.py -i ES09.bam,ES13.bam -b ../REFDB/TFBS/PIF4.bed -S 100 -z None -q 1 -e 150
+BAM2SizePlot.py -i ES11.bam,ES15.bam -b ../REFDB/TFBS/PIF4.bed -S 100 -z None -q 1 -e 150
 ```
