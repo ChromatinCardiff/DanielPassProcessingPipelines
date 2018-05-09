@@ -7,6 +7,9 @@ bowtie -v 3 --maxins 5000 --fr -k 1  -p 12 --sam indexes/TAIR10 -1 infile_R1.fas
 SAMparser2.pl -i infile.sam -o outdirectory -f HISEQ -p 80,150,350,500,680,860
 sgr_builder.pl -i outdirectory/infile_150.txt -o outfile.sgr -a 3
 sgr2wig.pl input.sgr output.wig
+danpos.py dpos ES09_150.wig,ES10_150.wig,ES11_150.wig,ES12_150.wig,ES13_150.wig,ES14_150.wig,ES15_150.wig,ES16_150.wig -o results_individually_normalised -c [Wigs with their read counts]
+danpos.py profile [normalised wigs] --genefile_paths LDcommonmodel-ARA11.genepred --name mean_ARA11 --genomic_sites TSS
+
 ```
 <hr>
 <h3>From FASTQ to SGR/WIG</h3>
