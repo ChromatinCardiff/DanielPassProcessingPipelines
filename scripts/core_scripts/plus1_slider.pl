@@ -101,7 +101,7 @@ while(my $line = <IN>){
 
   # use Max position as previously outputted by -X option
   if (exists $options{s}){
-    my $preshifts = @shifts[$lc];
+    my $preshifts = $shifts[$lc];
     $maxpos = (split /\t/, $preshifts)[1];
 
     ## Finding maximum position within defined range
@@ -141,7 +141,9 @@ if (!exists $options{X}){       # only print header if not doing the 'shift only
   print join ("\t", @h) . "\n";
   print "$options{i}\t";
 
+  my @avgline;
   foreach my $val (sort keys %posavg){
-    print $posavg{$val} / $lc . "\t";
+    push @avgline, ($posavg{$val} / $lc);
   }
+  print  join("\t",@avgline);
 }

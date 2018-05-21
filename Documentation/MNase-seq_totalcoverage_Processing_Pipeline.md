@@ -1,5 +1,7 @@
 <h3> Total Coverage processing</h3>
+```
 ##Make sure you're using samtools version >1.2 otherwise things will break and you won't know why (well, now you know why)
+```
 
 <b>Map reads command</b>
 ```
@@ -25,6 +27,8 @@ for i in *xls; do sed 's/^\(AT.......\)../\1/' $i >$i.cut; done
 for i in *xls; do sed 's/^\(AT.......\)../\1/' $i | awk '!seen[$1]++' >$i.cut; done
 ```
 
-# Run 2D vis for subNSP at TFBS
+#Run 2D vis for subNSP at TFBS
+```
 ~/Projects/DansProcessingPipeline/scripts/core_scripts/BAM2SizePlot.py -i ES09.bam,ES13.bam -b ../REFDB/TFBS/PIF4.bed -S 100 -z None -q 1 -e 150
 ~/Projects/DansProcessingPipeline/scripts/core_scripts/BAM2SizePlot.py -i ES11.bam,ES15.bam -b ../REFDB/TFBS/PIF4.bed -S 100 -z None -q 1 -e 150
+```

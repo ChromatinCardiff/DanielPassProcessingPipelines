@@ -10,7 +10,7 @@ x <- read.table("/home/sbi6dap/Projects/ACS/analysis/dpos/profile_TSS_heatmap/TS
 x <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq-80/RAWDATA/mean_ARA11_TSS.xls", header=TRUE, check.names = FALSE)
 x <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq-80/RAWDATA/mean_ARA11_TSS_heatmap/ES10_80.Fnor.smooth.wig.heatmap.xls-1nucl_align-full.txt", header=TRUE)
 
-
+x <- read.table("/home/sbi6dap/Projects/AGM/MNaseseq/lt120/lt120_norm/WholeGenome_TSS_heatmap/Araport_AGM_filtered_isoforms.genepred.tss.AGM07_lt120.Fnor.smooth.wig.heatmap.xls", header=TRUE)
 
 winsorize <-
   function(x, q=0.01)
@@ -29,44 +29,50 @@ winsorize <-
 x.annots <- x[1:4]
 rownames(x) <- x[,1]
 x[,1] <- NULL           ### DO 4 TIMES UNTIL I WORK OUT HOW TO REPEAT!
+x[,1] <- NULL           ### DO 4 TIMES UNTIL I WORK OUT HOW TO REPEAT!
+x[,1] <- NULL           ### DO 4 TIMES UNTIL I WORK OUT HOW TO REPEAT!
+x[,1] <- NULL           ### DO 4 TIMES UNTIL I WORK OUT HOW TO REPEAT!
 
 x$name <-NULL
 x.win <- x
 x.win[, -1] <- sapply(x.win[,-1], winsorize)
 
 #x.sub <- subset(x.win, , -c(c(1:3)))
-x.dec <- decostand(x.win, 'range', MARGIN=1)
+x.dec <- decostand(x.win[100:201], 'range', MARGIN=1)
 
-x.samp <- x.dec[sample(row(x.dec), 1000),]
-summary(x.dec)
+#x.samp <- x.dec[sample(row(x.dec), 1000),]
+#summary(x.dec)
 #head(x.dec, 10)
 
-k <- kmeans(x.dec, 6)
+k <- kmeans(x.dec,8, iter.max=100)
 x.k <- cbind(x.dec, cluster=k$cluster)
 
-x.ksub <- ddply(x.k, .(cluster), subset, sample(seq_along(cluster)<=1000))
+x.ksub <- ddply(x.k, .(cluster), subset, sample(seq_along(cluster)<=2000))
 x.ksub2 <- na.omit(x.ksub)
 
 #summary(x.ksub)
-x.sort <- x.ksub2[order(x.ksub2[,281]),]        #### MUST CHANGE BASED ON COLUMN NUMBER
+x.sort <- x.ksub2[order(x.ksub2[,103]),]        #### MUST CHANGE BASED ON COLUMN NUMBER
 x.sort <- cbind(x.sort, "idsort"=1:nrow(x.sort))
 #head(x.sort, 100)
 
-x.genes <- subset(x.sort, , c(281:282))        ######### Loot at column number
-#rownames(x.sort) <- x.sort[,302]
-x.annots <- x.k[281]
-write.table(x.annots, file = "/home/sbi6dap/Projects/ALD/MNase-seq-80/profile_TSS_heatmap/ES16_80-1nucl-clusters.txt")
+
+## Output gene cluster names
+x.genes <- subset(x.sort, , c(103:104))        ######### Loot at column number
+rownames(x.sort) <- x.sort[,104]
+x.annots <- x.k[103]
+write.table(x.annots, file = "/home/sbi6dap/Projects/AGM/MNaseseq/AGM07-lt120clusters.txt")
 
 x.melt <- melt(x.sort, id=c("cluster","idsort"))
-summary(x.melt)
-head(x.melt, 10)
+#summary(x.melt)
+#head(x.melt, 10)
 
 
 ggplot(x.melt) + 
   geom_tile(aes(x=variable, y=idsort, fill=value)) +
   scale_fill_gradient2(low="white", high="black") +
-  geom_vline(xintercept=150) +
-  scale_x_discrete(breaks=c(0, 281, by=10))
+  geom_vline(xintercept=50) +
+  scale_x_discrete(breaks=c(0, 103, by=10)) +
+  ggtitle("1kb span around TSS of <120bp bound particles (AGM07)")
 
 ### MDS 
 
@@ -139,7 +145,7 @@ ggplot(y.melt) +
   scale_x_discrete(breaks=c(0, 300, by=10)) + 
   theme(strip.background = element_blank(), strip.text = element_blank()) +
   facet_wrap(~cluster, ncol = 1, scales="free")
-  
+
 ## Ward Hierarchical Clustering
 d <- dist(y6, method = "euclidean") # distance matrix
 fit <- hclust(d, method="ward") 

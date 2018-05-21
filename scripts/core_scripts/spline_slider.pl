@@ -16,7 +16,7 @@ use Getopt::Std;
 my %options=();
 getopts('i:o:a:b:s:X', \%options);
 my $sep = "~~~\n";
-my $usage = "## USAGE:  plus1_slider.pl -i feature_positions.txt
+my $usage = "## USAGE:  spline_slider.pl -i feature_positions.txt
   [REQUIRED]
     -i infile.txt (columns: samples, Rows: positions)
   [OPTIONAL]

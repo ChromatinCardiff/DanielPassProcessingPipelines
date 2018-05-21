@@ -24,7 +24,8 @@ TSSA <- read.table("/home/sbi6dap/Projects/AGM/MNaseseq/Col0/particles/ALL/mean_
 TSST <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks-RNA-guided/mean_TAIR/mean_profile_CSS.xls", header=TRUE, sep="\t", row.names=1)
 
 #tmp
-tmp <- read.table("/home/sbi6dap/Projects/ALD/totalcoverage/mean_ESS_heatmap/LDcommonmodel-ARA11.genepred.ess.ES09_totalcov.Fnor.wig.heatmap_1st-exon.xls.cut", header=TRUE, sep="\t", row.names=1)
+tmp <- read.table("/home/sbi6dap/Projects/AGM/MNaseseq/particles/150_norm/TSS-cleared_TSS.xls", header=TRUE, sep="\t", row.names=1)
+# (Go to end of script)
 
 # Annotations
 Exposure <- c("Light","Light","Dark","Dark","Light","Light","Dark","Dark")
@@ -181,23 +182,23 @@ gene.plot <-p +
 multiplot(TSS.plot,TTS.plot,CSS.plot,CTS.plot,ESS.plot,ETS.plot, cols=3)
 
 ########### One Off charts ###########
-tmp.dec <- as.data.frame(decostand(tmp, 'standardize', MARGIN=2, na.rm =TRUE))
+tmp.dec <- as.data.frame(decostand(t(tmp), 'standardize', MARGIN=1, na.rm =TRUE))
 tmp.dec$pos <- rownames(tmp.dec)
-#tmp.dec = cbind(Exposure,Treatment,tmp.dec)
-tmp.melt <- melt(tmp.dec, id=c("pos"))
-tmp.melt <- melt(tmp.dec, id=c("pos", "Exposure","Treatment"))
+type <- c("WT","WT","WT","G54","G54","G54")
+tmp.dec = cbind(type,tmp.dec)
+tmp.melt <- melt(tmp.dec, id=c("pos", "type"))
+#tmp.melt <- melt(tmp.dec, id=c("pos", "Exposure","Treatment"))
 
-tmp$pos <- rownames(tmp)
-tmp.melt <- melt(tmp, id=c("pos"))
+#tmp$pos <- rownames(tmp)
+#tmp.melt <- melt(tmp, id=c("pos"))
 #######################################
-p <-ggplot(data=tmp.melt, aes(x=as.numeric(as.character(pos)), y=value, colour=variable)) # BASIC
-#p <-ggplot(data=tmp.melt, aes(x=as.numeric(as.character(variable)), y=value, colour=Exposure, lty=Treatment))
+p <-ggplot(data=tmp.melt, aes(x=as.numeric(as.character(variable)), y=value, colour=type)) # BASIC
 p +
   stat_smooth(method="loess", span=0.01, se=FALSE) +
   #geom_line(aes(x=as.numeric(as.character(variable)), y=value)) +
   scale_x_continuous(breaks = pretty_breaks(n=12)) +
   scale_colour_brewer(palette="Paired") +
-  #geom_vline(0, colour="blue", lty=2) +
+  geom_vline(xintercept = 0, colour="blue", lty=2) +
   #scale_y_continuous(limits=c(-3.5, 3.5)) +
   theme(legend.position = "bottom") +
-  labs(title = "TSS")
+  labs(title = "TSS : 150bp particles", x = "bp from TSS")

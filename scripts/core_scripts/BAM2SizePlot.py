@@ -21,7 +21,7 @@ import plotly
 import plotly.graph_objs as go
 
 ## Define some parameters IF YOU WANT TO SAVE TYPING! ##
-SAMdir = "/home/sbi6dap/RawData/ALD/MNase-seq/BAMs/"
+SAMdir = "/home/sbi6dap/RawData/AGM/MNase/bams/"
 GTFFile = "/home/sbi6dap/Projects/REFDB/Araport11_GFF3_genes_transposons.201606.gtf"
 
 if __name__ == '__main__':

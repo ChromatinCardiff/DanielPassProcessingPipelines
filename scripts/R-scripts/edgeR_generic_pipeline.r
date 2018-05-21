@@ -1,5 +1,5 @@
 library(edgeR)
-setwd("~/Projects/AGM/RNAseq/HTSeq/")
+setwd("~/Projects/ALD/RNAseq/ARA11/HTSeq/")
 
 # [optional] Pre-calculate length with gtf2lengthGC.r
 LengthGC <- read.table("~/Projects/REFDB/GC_lengths.tsv", header=TRUE)
@@ -64,6 +64,6 @@ title(main="WT vs CYCD31-OE")
 tt$table$ID <- row.names(tt$table)
 tmp.merge <- merge(tt$table, gene.names, by="ID", all.x = TRUE)
 de1.sort <- tmp.merge[with(tmp.merge, order(FDR)),]
-de1.sort <- tt$table[with(tt$table, order(FDR)),]
+#de1.sort <- tt$table[with(tt$table, order(FDR)),]
 head(de1.sort, n=10)
 write.csv(de1.sort, file="toptags_edgeR-WT_vs_cycd.csv", row.names = FALSE)
