@@ -7,7 +7,7 @@
 ```
 bowtie -v 3 --trim3 14 --maxins 5000 --fr -k 1  -p 12 --sam indexes/TAIR10 -1 ES09_R1.fastq -2 ES09_R2.fastq bowtie1/ES09_50bp.sam -t
 ```
-<b>convert mapped bam into paired-end bed file (coverage including gap between pairs), cut out relevant columns and sort
+<b>convert mapped bam into paired-end bed file (coverage including gap between pairs), cut out relevant columns and sort</b>
 ```
 samtools view -bf 0x2 ES09.bam | bamToBed -i stdin -bedpe | sort -k1,1 -k2,2n >ES09_bedpe.bed
 #Or run with particle size filtering (here mapping only <120 length regions)
@@ -27,8 +27,16 @@ for i in *xls; do sed 's/^\(AT.......\)../\1/' $i >$i.cut; done
 for i in *xls; do sed 's/^\(AT.......\)../\1/' $i | awk '!seen[$1]++' >$i.cut; done
 ```
 
+<<<<<<< HEAD
 #Run 2D vis for subNSP at TFBS
 ```
 ~/Projects/DansProcessingPipeline/scripts/core_scripts/BAM2SizePlot.py -i ES09.bam,ES13.bam -b ../REFDB/TFBS/PIF4.bed -S 100 -z None -q 1 -e 150
 ~/Projects/DansProcessingPipeline/scripts/core_scripts/BAM2SizePlot.py -i ES11.bam,ES15.bam -b ../REFDB/TFBS/PIF4.bed -S 100 -z None -q 1 -e 150
+=======
+# Run 2D vis for subNSP at TFBS
+
+```
+BAM2SizePlot.py -i ES09.bam,ES13.bam -b ../REFDB/TFBS/PIF4.bed -S 100 -z None -q 1 -e 150
+BAM2SizePlot.py -i ES11.bam,ES15.bam -b ../REFDB/TFBS/PIF4.bed -S 100 -z None -q 1 -e 150
+>>>>>>> 2dc74489983d8b03e5c6ccba9aa2cbd8c9e1904b
 ```
