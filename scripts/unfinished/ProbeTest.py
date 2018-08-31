@@ -19,10 +19,10 @@ if __name__ =='__main__':
 
 
 def main():
-    if args.i.endswith('.fasta'):
-        outputSlug = args.i[:-6]
-
     if args.i:
+        if args.i.endswith('.fasta'):
+            outputSlug = args.i[:-6]
+            
         with open(args.i, "rU") as handle:
             for siRNA in SeqIO.parse(handle, "fasta"):
                 probeArray = sliceProbe(siRNA)
