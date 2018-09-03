@@ -24,7 +24,7 @@ def main():
         outputSlug = args.i[:-6]
     elif args.i.endswith('.fa'):
         outputSlug = args.i[:-3]
-    else
+    else:
         outputSlug = args.i
 
     ## Open the input fasta and read it in to memory
@@ -50,7 +50,7 @@ def sliceProbe(siRNA):
     ## output the first 21 bases (or user specified) in fasta format (needed to go into blastn) then move one along base at a time, outputting each one
     while i <= len(siRNA.seq) - args.w:
         probeSeq = siRNA.seq[i:i+args.w]
-        probes.append(SeqRecord(probeSeq, id=str(probeSeq), description=""))
+        probes.append(SeqRecord(probeSeq, id=str(probeSeq), description=str(siRNA.id)))
         i += 1
 
     return probes
