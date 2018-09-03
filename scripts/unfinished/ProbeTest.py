@@ -27,6 +27,9 @@ def main():
     else:
         outputSlug = args.i
 
+    ## Test your blast database is correct or else fail
+    testBlastDB()
+
     ## Open the input fasta and read it in to memory
     with open(args.i, "rU") as handle:
         for siRNA in SeqIO.parse(handle, "fasta"):
@@ -75,6 +78,21 @@ def blastn(probesFile, outputSlug):
     blast_stdout_log.write(stdout)
 
     return blast_out
+
+def testBlastDB():
+    try:
+        open(args.d + ".nin")
+    except:
+        print "\n  This doesn't look like a real blast database. Did you link to the fasta file by mistake?"
+        print "  If you have the fasta file but not a blast database yet, run the following command:"
+        print "      makeblastdb -in myReferences.fasta -dbtype nucl -out myReferences\n"
+        print "  Now you should have 4 files:"
+        print "  --myReferences.fasta   (Your original input)\n  --myReferences.nhr\n  --myReferences.nin\n  --myReferences.nsq\n"
+        print "  You might also have multiple of these files with numbers and a file called myReferences.nal if you've got a lot of sequences"
+
+        print "\n  ##Now quitting the script##\n"
+
+        quit()
 
 if __name__ == "__main__":
     main()
