@@ -15,6 +15,8 @@ if __name__ =='__main__':
     parser.add_argument('-d', required=True, help='[REQUIRED] | Blast database you want to search against (make sure it is discoverable or give full path)')
     parser.add_argument('-w', default=21, help='Window length of the probes you want to test | default = 21')
     parser.add_argument('-a', default=1, help='Number of cores you want to blast with | default = 1')
+    parser.add_argument('-e', default=0.05, help='Maximum e-value for blastn-short | default = 0.05')
+    parser.add_argument('-p', default=80, help='Minimum required percentage identity for blastn-short | default = 80')
 
     args = parser.parse_args()
 
@@ -27,6 +29,8 @@ def main():
     else:
         outputSlug = args.i
 
+    probesFile =  outputSlug + "-probes.fasta"
+
     ## Test your blast database is correct or else fail
     testBlastDB()
 
@@ -37,15 +41,17 @@ def main():
             probeArray = sliceProbe(siRNA)
             ## Some nice outputs and write it to a file
             print str(len(probeArray)) + " probes were generated"
-            probesFile =  outputSlug + "-probes.fasta"
+
             SeqIO.write(probeArray, probesFile, "fasta")
 
     ## Run blast on all the probes generated
-    blastn(probesFile, outputSlug)
+    blastOutput = blastn(probesFile, outputSlug)
+    print("There were " + str(sum(1 for line in open(blastOutput))) + " matches against the blast database")
+    print("\nOutputted files are:\n -- " + probesFile + "\n -- " + blastOutput)
 
 
 def sliceProbe(siRNA):
-    print "Reading siRNA and slicing it into windows of", args.w, "size"
+    print "\n -- Reading siRNA and slicing it into windows of", args.w, "size"
 
     probes = []
     i = 0
@@ -60,14 +66,17 @@ def sliceProbe(siRNA):
 
 def blastn(probesFile, outputSlug):
     ## define the parameters
-    print("blasting probe sequence " + probesFile + " against the " + args.d + " database with BLASTN-SHORT")
+    print(" -- Blasting probe sequence                   " + probesFile)
+    print(" -- Using BLASTN-SHORT against the database   " + args.d)
+    print(" -- Requiring minimum e-value of              " + str(args.e))
+    print(" -- Requiring minimum percentage identity of  " + str(args.p) )
 
     blast_in = (probesFile)
     blast_out = (outputSlug + "-probes.blast")
 
     ## Define the command. NOTE: Running blastn-short!
     # OUTPUT COLUMNS ARE: query id, subject id, % identity, alignment length, mismatches, gap opens, q. start, q. end, s. start, s. end, evalue, bit score, sequence
-    blastn_cline = NcbiblastnCommandline(task="blastn-short", query=blast_in, db=args.d, evalue=0.01, outfmt=6, out=blast_out, num_threads=args.a)
+    blastn_cline = NcbiblastnCommandline(task="blastn-short", query=blast_in, db=args.d, perc_identity=args.p, evalue=args.e, outfmt=6, out=blast_out, num_threads=args.a)
 
     stdout, stderr = blastn_cline()
 
@@ -89,6 +98,7 @@ def testBlastDB():
         print "  Now you should have 4 files:"
         print "  --myReferences.fasta   (Your original input)\n  --myReferences.nhr\n  --myReferences.nin\n  --myReferences.nsq\n"
         print "  You might also have multiple of these files with numbers and a file called myReferences.nal if you've got a lot of sequences"
+        print "  The script should now run with <.... -d myReferences ....>. Note that there is no suffix on that parameter"
 
         print "\n  ##Now quitting the script##\n"
 
