@@ -10,7 +10,7 @@ library(vegan)
 ####################################################################################################################
 
 # Read in
-TSS <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks-RNA-guided/median/median_profile_TSS.xls", header=TRUE, sep="\t", row.names=1)
+TSS <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks-RNA-guided/mean_ARA11_GMC_TSS.xls", header=TRUE, sep="\t", row.names=1)
 TTS <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks-RNA-guided/median/median_profile_TTS.xls", header=TRUE, sep="\t")
 CSS <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks-RNA-guided/median/median_profile_CSS.xls", header=TRUE, sep="\t")
 CTS <- read.table("/home/sbi6dap/Projects/ALD/MNase-seq/dpos_peaks-RNA-guided/median/median_profile_CTS.xls", header=TRUE, sep="\t")
@@ -39,7 +39,7 @@ Digest <- c("Low","High","Low","High","Low","High","Low","Low","Low")
 
 ############### TSS ###############
 
-TSSA.dec <- as.data.frame(decostand(t(TSSA), 'standardize', MARGIN=1))
+TSSA.dec <- as.data.frame(decostand(t(TSS), 'standardize', MARGIN=1))
 Annot <- c("ARA","ARA","ARA","ARA","ARA","ARA","ARA","ARA")
 TSSA.dec$pos <- rownames(TSSA.dec)
 TSSA.dec = cbind(Exposure,Treatment,Annot,TSSA.dec)
@@ -65,7 +65,7 @@ TSS.plot <-p +
   #geom_line(aes(x=as.numeric(as.character(variable)), y=value))+#, colour=Exposure)) +
   scale_x_continuous(breaks = pretty_breaks(n=12)) +
   #scale_colour_brewer(palette="Paired") +
-  geom_vline(x=0, colour="blue", lty=2) +
+  geom_vline(xintercept=0, colour="blue", linetype="longdash") +
   #scale_y_continuous(limits=c(-3.5, 3.5)) +
   theme(legend.position = "bottom") +
   labs(title = "TSS") 

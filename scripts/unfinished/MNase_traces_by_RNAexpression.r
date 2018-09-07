@@ -39,7 +39,7 @@ files[[5]]$ID <- row.names(files[[5]])
 files[[6]]$ID <- row.names(files[[6]])
 
 
-WT.df <- bind_rows(list(files[[1]], files[[2]], files[[3]])) %>% group_by(ID) %>% summarise_all(funs(mean))
+WT.df <- data.frame(bind_rows(list(files[[1]], files[[2]], files[[3]])) %>% group_by(ID) %>% summarise_all(funs(mean)))
 G54.df <- bind_rows(list(files[[4]], files[[5]], files[[6]])) %>% group_by(ID) %>% summarise_all(funs(mean))
 
 setwd("/home/sbi6dap/Dropbox/Work/Projects/Athal-projects/AGM/kmeans/")
@@ -63,9 +63,9 @@ cnc <- function(x){
   x.RNA <- merge(RNAseq_data, kTable, by="ID")
   head(x.RNA)
   #print(aggregate(x.RNA$logFC, list(x.RNA$k.cluster), mean))
-  #clustTable <- cbind(RNA_FC=aggregate(x.RNA$logFC, list(x.RNA$k.cluster), mean), clusters=table(k$cluster))
-  #tmp <- cbind(RNA_abun=data.frame(aggregate(x.RNA$WTavg, list(x.RNA$k.cluster), mean)), clusters=table(k$cluster))
-  #clustTable <- tmp[, c(1,2,4)]
+  clustTable <- cbind(RNA_FC=aggregate(x.RNA$logFC, list(x.RNA$k.cluster), mean), clusters=table(k$cluster))
+  tmp <- cbind(RNA_abun=data.frame(aggregate(x.RNA$WTavg, list(x.RNA$k.cluster), mean)), clusters=table(k$cluster))
+  clustTable <- tmp[, c(1,2,4)]
   
   #cluster size only
   #clustTable <- data.frame(table(k$cluster))
