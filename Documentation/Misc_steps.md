@@ -92,3 +92,9 @@ scanMotifGenomeWide.pl TFBS/SORLREP2.motif TAIR10_Chr.all.fasta -bed >TFBS/SORLR
 awk '{$98 = $4-5; $99 = $4+5; print $1 ":" $98 "-" $99}' Athamap-PIF5.txt | sed 's/At\(.\).*:/Chr\1:/' > AthamapPIF5.bed
 ## Note: Clean up first and last lines!
 ```
+
+# Remove non sequential duplicate lines:
+```
+awk '!a[$0]++' infile > outfile
+```
+
