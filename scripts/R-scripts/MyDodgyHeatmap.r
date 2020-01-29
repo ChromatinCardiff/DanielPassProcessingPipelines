@@ -5,12 +5,16 @@ library(RColorBrewer)
 library(gplots)
 
 #library(gplots)
+IDtoGene <- read.delim("/home/daniel/GRH/YSR/Homo_sapiens.GRCh38.97.map.txt", header=T)
 
+
+# Pick input
 x = read.csv("/home/daniel/Dropbox/Work/GRH/Yasir_Syed/gProfiler/gProfiler_rmout_summary.csv", header = TRUE)
 x = read.csv("/home/daniel/GRH/YSR/rmdup/ASD_norm_counts_sigonly.txt", header = TRUE)
+x = read.csv("/home/daniel/GRH/YSR/rmdup/SCZ_norm_counts.txt", header = TRUE)
 x = read.csv("/home/daniel/GRH/YSR/rmdup/Anysigs.csv", header = TRUE)
 
-IDtoGene <- read.delim("/home/daniel/GRH/YSR/Homo_sapiens.GRCh38.97.map.txt", header=T)
+
 dat.annot <- merge(x, IDtoGene, by.x="Id", by.y="Id" )
 
 rownames(dat.annot) <- dat.annot$Name 
@@ -23,7 +27,7 @@ dat.annot$Name <- NULL
 #rownames(x.filt.cols) <- x.filt.cols$term_name
 #x.filt.heatmap <- data.matrix(x.filt.cols[2:5])
 
-my_palette <- colorRampPalette(brewer.pal(9,"Blues"))
+my_palette <- colorRampPalette(brewer.pal(9,"Reds"))
 
 heatmap.2(data.matrix(log2(dat.annot+1)),
           Rowv=TRUE,
@@ -40,7 +44,7 @@ heatmap.2(data.matrix(log2(dat.annot+1)),
           sepwidth=c(0.001,0.001),
 #          colsep = 1:ncol(x.filt),
           #rowsep = 1:nrow(x.filt.heatmap),
-          xlab = "samples", ylab = "genes", main = "ASDSigGenes",
+          xlab = "samples", ylab = "genes", main = "SCZSigGenes",
           #key=TRUE,
           #keysize=1,
           trace="none",

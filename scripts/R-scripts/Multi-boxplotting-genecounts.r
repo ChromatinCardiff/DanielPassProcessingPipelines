@@ -2,9 +2,10 @@ library(ggplot2)
 library(reshape)
 library(dplyr)
 library(tibble)
-install.packages("ggsignif")
+#install.packages("ggsignif")
 library(ggsignif)
 
+IDtoGene <- read.delim("/home/daniel/GRH/YSR/Homo_sapiens.GRCh38.97.map.txt", header=T)
 
 
 
@@ -16,7 +17,7 @@ dat <- merge(x2, meta, by="Sample_ID")
 dat.melt <-melt(dat)
 dat.annot <- merge(dat.melt, IDtoGene, by.x="variable", by.y="Id" )
 
-#t <- subset(dat.annot, Name=="RIMS1")
+#t <- subset(dat.annot, Name=="HYDIN")
 
 
 p <- ggplot(dat.annot, aes(Type, value))
